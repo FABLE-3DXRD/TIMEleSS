@@ -1,0 +1,7 @@
+# ignore compiled python files
+*.pyc
+# ignore TIMEleSS.egg-info/ folder (created by setup.py)
+TIMEleSS.egg-info/
+# ignore git specific files
+.git/
+
