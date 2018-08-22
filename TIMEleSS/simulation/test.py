@@ -35,12 +35,12 @@ def test():
 	logfile = pkg_resources.resource_filename(__name__, '../data/gve-62-3.log')
 	gfffile = pkg_resources.resource_filename(__name__, '../data/fcc_10bckg_.gff')
 	
-	print "Ok, we made it. We loaded the various files"
+	print ("Ok, we made it. We loaded the various files")
 	
-	print "\nTest GrainSpotter parsing:"
+	print ("\nTest GrainSpotter parsing:")
 	grains1 = multigrainOutputParser.parseGrains(logfile)
-	print "Parsed %s, read %d grains" % (logfile, len(grains1))
+	print ("Parsed %s, read %d grains" % (logfile, len(grains1)))
 	
-	print "\nTest GFF parsing:"
+	print ("\nTest GFF parsing:")
 	grains2 = multigrainOutputParser.parseGrains(gfffile)
-	print "Parsed %s, read %d grains" % (gfffile, len(grains2))
+	print ("Parsed %s, read %d grains" % (gfffile, len(grains2)))
