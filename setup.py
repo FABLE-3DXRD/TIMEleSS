@@ -51,12 +51,15 @@ setup(
 	package_dir = {
 				'TIMEleSS': 'TIMEleSS',
 				'TIMEleSS.general': pathMySubPackage1,
-				'TIMEleSS.simulation': pathMySubPackage2},
+				'TIMEleSS.simulation': pathMySubPackage2,
+                'TIMEleSS.data': util.convert_path('TIMEleSS/data')},
 	packages=['TIMEleSS', 'TIMEleSS.general',
 				'TIMEleSS.simulation'],
 	
 	
 	package_data = {'TIMEleSS': ['TIMEleSS/data/*.*']},
+	include_package_data=True,
+	zip_safe=False, # This is needed so the package is not stuffed into a zip. Data files can not be accessed if so.
 	
 	entry_points = {
 		'console_scripts': [
