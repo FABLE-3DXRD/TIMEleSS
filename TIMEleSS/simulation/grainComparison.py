@@ -29,6 +29,8 @@ import sys
 import argparse
 import os.path
 
+# Maths stuff
+import numpy
 
 # TIMEleSS parsing utilities
 from TIMEleSS.general import multigrainOutputParser
@@ -209,8 +211,8 @@ def logit(stream, text):
 	- stream: stream for the log file
 	- text: text to be written
 	"""
-	print text
-	print >> stream, text
+	print (text)
+	stream.write(text + "\n")
 
 #################################################################
 #
@@ -305,7 +307,7 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	logmatching = open(filename2,'w')
 	filename3 = "%s-%s" % (outputstem , "erroneous-grains.dat")
 	logerroneous = open(filename3,'w')
-	print "3 output files will be generated: \n- %s,\n- %s,\n- %s\n" % (filename1, filename2, filename3)
+	print ("3 output files will be generated: \n- %s,\n- %s,\n- %s\n" % (filename1, filename2, filename3))
 
 	# Counting number of grains
 	grains1 = multigrainOutputParser.parseGrains(file1)
@@ -349,21 +351,21 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 			U1 = grain1.getU()
 			angle = minMisorientation(U1,U2,crystal_system)
 			logit(logfile, "- Grain %s of %s matches %s of %s with a misorientation of %.2f°" % (grain1.getName(), file1, grain2.getName(), file2, angle))
-			print >>logmatching, "Grain %s of %s" % (grain1.getName(), file1)
-			print >>logmatching, "\tmatches grain %s of %s" % (grain2.getName(), file2)
-			print >>logmatching, "\tmisorientation: %.2f°" % (angle)
-			print >>logmatching, "U grain 1: \n", U1
-			print >>logmatching, "U grain 2: \n", U2
-			print >>logmatching, "\n"
+			logmatching.write("Grain %s of %s\n" % (grain1.getName(), file1))
+			logmatching.write("\tmatches grain %s of %s\n" % (grain2.getName(), file2))
+			logmatching.write("\tmisorientation: %.2f°\n" % (angle))
+			logmatching.write("U grain 1: \n" + numpy.array2string(U1) + "\n")
+			logmatching.write("U grain 2: \n" + numpy.array2string(U2) + "\n")
+			logmatching.write("\n\n")
 		else:
 			erroneousGrains.append(i)
 			logit(logfile, "- Grain %s of %s has no match" % (grain2.getName(), file2))
-			print >>logerroneous, "\nGrain %s of %s: no match" % (grain2.getName(), file2)
+			logerroneous.write("\nGrain %s of %s: no match\n" % (grain2.getName(), file2))
 			for j in range(0, len(grains1clean)):
 				grain1 = grains1clean[j]
 				U1 = grain1.getU()
 				angle = minMisorientation(U1,U2,crystal_system)
-				print >>logerroneous, "- Min angle with grain %s: %.2f°" % (grain1.getName(),angle)
+				logerroneous.write("- Min angle with grain %s: %.2f°\n" % (grain1.getName(),angle))
 	logit(logfile, "End of run\n")
 	
 	logit(logfile, "N. of grains in %s: %d" % (file1, ngrains1))
@@ -422,11 +424,11 @@ def main(argv):
 	cutoff = args['misorientation']
 	
 	if (not(os.path.isfile(file1))):
-		print "Error: file %s not found" % file1
+		print ("Error: file %s not found" % file1)
 		sys.exit(2)
 		
 	if (not(os.path.isfile(file2))):
-		print "Error: file %s not found" % file2
+		print ("Error: file %s not found" % file2)
 		sys.exit(2)
 
 	comparaison(file1, file2, crystal_system, cutoff, stem)
