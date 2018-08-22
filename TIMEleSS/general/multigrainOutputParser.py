@@ -250,5 +250,5 @@ def parseFLT(fname):
 			idlist.append(thisid)
 			peaks.append(peak)
 	f.close()
-	print "Parsed list of peaks from flt file %s, found %i peaks" % ( fname, len(peaks))
+	print ("Parsed list of peaks from flt file %s, found %i peaks" % ( fname, len(peaks)))
 	return [peaks,idlist]
