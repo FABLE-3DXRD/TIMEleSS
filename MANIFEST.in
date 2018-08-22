@@ -1,0 +1,3 @@
+recursive-include examples *.txt *.py
+include TIMEleSS/data/fcc_10bckg_.gff
+include TIMEleSS/data/gve-62-3.log 
