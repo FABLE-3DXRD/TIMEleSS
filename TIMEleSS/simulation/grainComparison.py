@@ -378,8 +378,8 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	logit(logfile, "\nIndexing capability")
 	logit(logfile, "- %.1f pc of %s grains indexed" % (100.*len(goodGrains)/len(grains1clean), file1))
 	logit(logfile, "- %.1f pc of %s grains not indexed" % (100.-100.*len(goodGrains)/len(grains1clean), file1))
-	logit(logfile, "- %.1f pc of erroneous grains in %s" % (100.-100.*len(erroneousGrains)/len(grains2clean), file2))
-	
+	logit(logfile, "- %.1f pc of erroneous grains in %s" % (100.*len(erroneousGrains)/len(grains2clean), file2))
+	 
 	logmatching.close()
 	logfile.close()
 	logerroneous.close()
