@@ -54,6 +54,7 @@ class Grain:
 		self.peaks = []							# Will hold a list of peaks
 		self.filename = ""						# File from which the grain was read
 		self.indexInFile = 0					# Grain number in the file
+		self.grainSpotterTxt = ""				# Full text from GrainSpotter log file
 		
 	def setFileName(self,name):
 		self.filename = name
@@ -92,6 +93,11 @@ class Grain:
 	
 	def setPeaks(self,peaks):
 		self.peaks = peaks
+	
+	def setGrainSpotterTxt(self,txt):
+		self.grainSpotterTxt = txt
+	def getGrainSpotterTxt(self):
+		return self.grainSpotterTxt
 	
 	def EulerAnglesFromU(self):
 		phiRad = numpy.arccos(self.U[2,2])
