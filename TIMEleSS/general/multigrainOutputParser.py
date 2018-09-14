@@ -60,6 +60,8 @@ def parseGrains(filename):
 		return parse_gff(filename)
 	elif (file_extension == ".log"):
 		return parse_GrainSpotter_log(filename)
+	else:
+		print ("Error parsing %f. I do not know this file extension. Should be .log or .gff" % filename)
 	return []
 
 
@@ -105,7 +107,8 @@ def parse_GrainSpotter_log(logfile):
 			NumbGrain += 1
 			headgrains.append(lineNumb)
 	headgrains.remove(headgrains[0])
-	for lineindex in headgrains:
+	for grainnn in range(0,len(headgrains)):
+		lineindex = headgrains[grainnn]
 		line = logcontent[lineindex]
 		# Getting number of peaks
 		a=line.split()
@@ -155,6 +158,17 @@ def parse_GrainSpotter_log(logfile):
 			thispeak.setTThetaMeasured(float(peakinfo[20]))
 			peakList.append(thispeak)
 		grain.setPeaks(peakList)
+		# Extracting the full text from the GrainSpotter logfile. Can be useful to generate new files
+		if (grainnn < (len(headgrains)-1)):
+			lineindex1 = headgrains[grainnn]
+			lineindex2 = headgrains[grainnn+1]
+		else:
+			lineindex1 = headgrains[grainnn]
+			lineindex2 = len(logcontent)-1
+		txt = logcontent[lineindex1:lineindex2]
+		grain.setGrainSpotterTxt(txt)
+		
+		# Adding the grain the the grain list
 		grainList.append(grain)
 	
 	return grainList
