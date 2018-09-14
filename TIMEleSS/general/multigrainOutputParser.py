@@ -216,7 +216,7 @@ q0 qx qy qz
 	i = 0
 	for grain in grains:
 		i += 1
-		text = grain.getGrainSpotterTxt()
+		text = (grain.getGrainSpotterTxt())[:] # we make a copy of the array, this is important
 		# Remove first line (it includes the grain number, which we need to change)
 		del text[0]
 		output.write("Grain    %d, %d\n" % (i, grain.getNPeaks()))
