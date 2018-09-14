@@ -61,7 +61,7 @@ def parseGrains(filename):
 	elif (file_extension == ".log"):
 		return parse_GrainSpotter_log(filename)
 	else:
-		print ("Error parsing %f. I do not know this file extension. Should be .log or .gff" % filename)
+		print ("Error parsing %s. I do not know this file extension. Should be .log or .gff" % filename)
 	return []
 
 
