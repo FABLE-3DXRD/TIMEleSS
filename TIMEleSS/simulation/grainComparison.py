@@ -258,13 +258,14 @@ def removeDoubleGrains(grains, crystal_system, cutoff, logfile):
 	grainsToRemove.sort()
 	grainsToRemove.reverse()
 	nRemove = len(grainsToRemove)
+	newgrains = grains[:]
 	for i in range(0, nRemove):
-		del grains[grainsToRemove[i]]
+		del newgrains[grainsToRemove[i]]
 	# Log and return
 	logit(logfile, "Found %d grains indexed twice" % (nRemove))
-	logit(logfile, "New number of grains: %d" % len(grains))
+	logit(logfile, "New number of grains: %d" % len(newgrains))
 	
-	return grains
+	return newgrains
 
 #################################################################
 #
