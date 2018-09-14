@@ -164,7 +164,7 @@ def parse_GrainSpotter_log(logfile):
 			lineindex2 = headgrains[grainnn+1]
 		else:
 			lineindex1 = headgrains[grainnn]
-			lineindex2 = len(logcontent)-1
+			lineindex2 = len(logcontent)-2
 		txt = logcontent[lineindex1:lineindex2]
 		grain.setGrainSpotterTxt(txt)
 		
@@ -172,6 +172,58 @@ def parse_GrainSpotter_log(logfile):
 		grainList.append(grain)
 	
 	return grainList
+
+############################################################################################# 
+
+
+"""
+Save grains (read from a GrainSpotter log) into a new GrainSpotter log file
+
+Returns 
+	Nothing
+
+Parameters
+	outputname: name and path in which to save data
+	grains: a list of grains
+"""
+def saveGrainSpotter(outputname,grains):
+	output = open(outputname,'w')
+	text = """Found %d grains
+Syntax:
+Grain nr
+#expected gvectors #measured gvectors #measured once #measured more than once
+mean_IA position_x position_y position_z pos_chisq
+U11 U12 U13
+U21 U22 U23
+U31 U32 U33
+
+UBI11 UBI12 UBI13
+UBI21 UBI22 UBI23
+UBI31 UBI32 UBI33
+
+r1 r2 r3
+
+phi1 phi phi2
+
+q0 qx qy qz
+
+#  gvector_id peak_id  h k l  h_pred k_pred l_pred  dh dk dl  tth_meas tth_pred dtth  omega_meas omega_pred domega  eta_meas  eta_pred deta  IA
+.
+.
+""" % len(grains)
+	output.write(text)
+	output.write("\n")
+	i = 0
+	for grain in grains:
+		i += 1
+		text = grain.getGrainSpotterTxt()
+		# Remove first line (it includes the grain number, which we need to change)
+		del text[0]
+		output.write("Grain    %d, %d\n" % (i, grain.getNPeaks()))
+		for line in text:
+			output.write(line)
+			output.write("\n")
+	output.close()
 
 
 #############################################################################################     
