@@ -65,6 +65,7 @@ setup(
 		'console_scripts': [
 			'timelessTest = TIMEleSS.simulation.test:test',
 			'timelessGrainComparison = TIMEleSS.simulation.grainComparison:run',
+			'timelessGrainSpotterMerge = TIMEleSS.simulation.grainSpotterMerge:run',
         ]
 		#'gui_scripts': [
 		#    'baz = my_package_gui:start_func',
