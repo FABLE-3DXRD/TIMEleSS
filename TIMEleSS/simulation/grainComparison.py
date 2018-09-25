@@ -308,7 +308,9 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	logmatching = open(filename2,'w')
 	filename3 = "%s-%s" % (outputstem , "erroneous-grains.dat")
 	logerroneous = open(filename3,'w')
-	print ("3 output files will be generated: \n- %s,\n- %s,\n- %s\n" % (filename1, filename2, filename3))
+	filename4 = "%s-%s" % (outputstem , "missing-grains.dat")
+	logmissing = open(filename4,'w')
+	print ("4 output files will be generated: \n- %s,\n- %s,\n- %s,\n- %s\n" % (filename1, filename2, filename3, filename4))
 
 	# Counting number of grains
 	grains1 = multigrainOutputParser.parseGrains(file1)
@@ -333,6 +335,7 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	# Loop in unique grains in list 1, trying to find pairs in list 2
 	goodGrains = [] # grains in list 2 that exist in list 1
 	erroneousGrains = [] # grains in list 2 that do not exist in list 1
+	grains1cleanFound = numpy.full((len(grains1clean),1), False, dtype=bool)
 	logit(logfile, "Trying to match grains between the 2 collections...")
 	for i in range(0,len(grains2clean)):
 		grainMatched = []
@@ -343,6 +346,7 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 			U1 = grain1.getU()
 			if (matchGrains(U1, U2, crystal_system, cutoff)):
 				grainMatched.append(j)
+				grains1cleanFound[j] = True
 		if len(grainMatched) > 1 :
 			logit(logfile, "- Found more than 1 pair for grain %d. Something is wrong" % i)
 			sys.exit(2)
@@ -369,6 +373,11 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 				logerroneous.write("- Min angle with grain %s: %.2f°\n" % (grain1.getName(),angle))
 	logit(logfile, "End of run\n")
 	
+	for i in range(0,len(grains1clean)):
+		if (not grains1cleanFound[i]):
+			grain1 = grains1clean[i]
+			logmissing.write("Grain %s of %s has no match\n" % (grain1.getName(), file1))
+	
 	logit(logfile, "N. of grains in %s: %d" % (file1, ngrains1))
 	logit(logfile, "N. of unique grains in %s: %d" % (file1, len(grains1clean)))
 	logit(logfile, "N. of grains in %s: %d" % (file2, ngrains2))
@@ -381,11 +390,12 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	logit(logfile, "- %.1f pc of %s grains not indexed" % (100.-100.*len(goodGrains)/len(grains1clean), file1))
 	logit(logfile, "- %.1f pc of erroneous grains in %s" % (100.*len(erroneousGrains)/len(grains2clean), file2))
 	
-	print ("\n3 output files were generated: \n- %s,\n- %s with the matching grains,\n- %s with erroneous grains\n" % (filename1, filename2, filename3))
+	print ("\n4 output files were generated: \n- %s,\n- %s with the matching grains,\n- %s with erroneous grains,\n- %s with missing grains\n" % (filename1, filename2, filename3, filename4))
 	 
 	logmatching.close()
 	logfile.close()
 	logerroneous.close()
+	logmissing.close()
 
 
 #################################################################
