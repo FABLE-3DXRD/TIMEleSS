@@ -47,7 +47,7 @@ setup(
     'Science project': 'http://timeless.texure.rocks',
 	},
 	
-	install_requires=['xfab','numpy','scipy'],
+	install_requires=['xfab','numpy','scipy','fabio'],
 	
 	package_dir = {
 				'TIMEleSS': 'TIMEleSS',
@@ -69,6 +69,7 @@ setup(
 			'timelessGrainSpotterMerge = TIMEleSS.simulation.grainSpotterMerge:run',
 			'timelessTiff2edf = TIMEleSS.diffraction.tiff2edf:run',
 			'timelessMccd2edf = TIMEleSS.diffraction.mccd2edf:run',
+			'timelessAverageEDF = TIMEleSS.diffraction.averageImage:run',
         ]
 		#'gui_scripts': [
 		#    'baz = my_package_gui:start_func',
