@@ -32,6 +32,7 @@ from distutils import util
 
 pathMySubPackage1 = util.convert_path('TIMEleSS/general')
 pathMySubPackage2 = util.convert_path('TIMEleSS/simulation')
+pathMySubPackage3 = util.convert_path('TIMEleSS/diffraction')
     
 setup(
 	name='TIMEleSS',
@@ -52,9 +53,9 @@ setup(
 				'TIMEleSS': 'TIMEleSS',
 				'TIMEleSS.general': pathMySubPackage1,
 				'TIMEleSS.simulation': pathMySubPackage2,
+				'TIMEleSS.diffraction': pathMySubPackage3,
                 'TIMEleSS.data': util.convert_path('TIMEleSS/data')},
-	packages=['TIMEleSS', 'TIMEleSS.general',
-				'TIMEleSS.simulation'],
+	packages=['TIMEleSS', 'TIMEleSS.general', 'TIMEleSS.simulation', 'TIMEleSS.diffraction'],
 	
 	
 	package_data = {'TIMEleSS': ['TIMEleSS/data/*.*']},
@@ -66,6 +67,8 @@ setup(
 			'timelessTest = TIMEleSS.simulation.test:test',
 			'timelessGrainComparison = TIMEleSS.simulation.grainComparison:run',
 			'timelessGrainSpotterMerge = TIMEleSS.simulation.grainSpotterMerge:run',
+			'timelessTiff2edf = TIMEleSS.diffraction.tiff2edf:run',
+			'timelessMccd2edf = TIMEleSS.diffraction.mccd2edf:run',
         ]
 		#'gui_scripts': [
 		#    'baz = my_package_gui:start_func',
