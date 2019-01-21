@@ -60,17 +60,31 @@ class indexedPeak:
 	
 	def setNum(self,n):
 		self.num = n
+		
 	def setGVEID(self,n):
 		self.gvpeakid = n
+	def getGVEID(self):
+		return self.gvpeakid
+	
 	def setPeakID(self,n):
 		self.peakid = n
+	def getPeakID(self):
+		return self.peakid
 	
 	def setOmegaMeasured(self,o):
 		self.omegameasured = o
+	def getOmegaMeasured(self):
+		return self.omegameasured
+	
 	def setEtaMeasured(self,o):
 		self.etameasured = o
+	def getEtaMeasured(self):
+		return self.etameasured
+		
 	def setTThetaMeasured(self,o):
 		self.tthetameasured = o
+	def getTThetaMeasured(self):
+		return self.tthetameasured
 	
 	def setHKL(self,h,k,l):
 		self.h = h
