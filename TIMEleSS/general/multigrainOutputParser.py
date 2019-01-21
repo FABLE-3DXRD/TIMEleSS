@@ -318,3 +318,49 @@ def parseFLT(fname):
 	f.close()
 	print ("Parsed list of peaks from flt file %s, found %i peaks" % ( fname, len(peaks)))
 	return [peaks,idlist]
+
+
+#############################################################################################
+
+"""
+Parser for GVE (peaks from diffraction data, peaks coordinate have been converted into ds, eta, and etc already)
+
+Returns 
+	Two lists
+	- peaks
+	- idlist
+	A header
+	- header: anyting that is before the list of peaks
+	
+	idlist is the list of "spot3d_id" for each peak
+	peaks is a collection of peaks, each of them is a dictionnary will all information from the gve file
+
+Parameters
+	fname: name and path to the GVE file
+"""
+def parseGVE(fname):
+	strings = " xr yr zr xc yc ds eta omega spot3d_id xl yl zl"
+	stringlist = strings.split()
+	peaks = []
+	idlist = []
+	header = "";
+	# Read file
+	inheader = True
+	f = open(fname, 'r')
+	for line in f.readlines():
+		if (inheader):
+			if (line.strip() == "# xr yr zr xc yc ds eta omega spot3d_id xl yl zl"):
+				inheader = False
+			header += line
+		else:
+			li=line.strip()
+			peak = {}
+			litxt = li.split()
+			for i in range(0,len(stringlist)):
+				peak[stringlist[i]] = litxt[i]
+			thisid = int(peak["spot3d_id"])
+			idlist.append(thisid)
+			peaks.append(peak)
+	f.close()
+	print ("Parsed list of peaks from gve file %s, found %i peaks" % ( fname, len(peaks)))
+	return [peaks,idlist,header]
