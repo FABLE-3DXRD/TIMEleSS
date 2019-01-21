@@ -93,6 +93,9 @@ class Grain:
 	
 	def setPeaks(self,peaks):
 		self.peaks = peaks
+		
+	def getPeaks(self):
+		return self.peaks
 	
 	def setGrainSpotterTxt(self,txt):
 		self.grainSpotterTxt = txt
