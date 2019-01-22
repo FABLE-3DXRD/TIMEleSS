@@ -349,7 +349,7 @@ def parseGVE(fname):
 	f = open(fname, 'r')
 	for line in f.readlines():
 		if (inheader):
-			if (line.strip() == "# xr yr zr xc yc ds eta omega spot3d_id xl yl zl"):
+			if ((line.strip() == "# xr yr zr xc yc ds eta omega spot3d_id xl yl zl") or (line.strip() == "#  gx  gy  gz  xc  yc  ds  eta  omega  spot3d_id  xl  yl  zl")):
 				inheader = False
 			header += line
 		else:
