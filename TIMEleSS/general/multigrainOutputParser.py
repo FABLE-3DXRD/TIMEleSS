@@ -386,7 +386,6 @@ Parameters
 def saveGVE(peaks, header, fname):
 	headers = header.split('\n')
 	txtitemstosave = headers[len(headers)-2]
-	print txtitemstosave
 	itemstosave = txtitemstosave.split()
 	del itemstosave[0]
 	txt = header
