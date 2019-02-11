@@ -37,7 +37,7 @@ import fabio
 import fabio.edfimage
 
 
-def tiffToEdf(tiffimagepath, edfimagepath, stem, extension, fromm, to, step, first,digits):
+def tiffToEdf(tiffimagepath, edfimagepath, stem, extension, fromm, to, step, first,digits,dounderscore):
 
 	omegarange = to-fromm
 	nsteps = int(omegarange/step)
@@ -45,6 +45,10 @@ def tiffToEdf(tiffimagepath, edfimagepath, stem, extension, fromm, to, step, fir
 	formatfileedf = "%s%0"+str(digits)+"d.edf"
 	totalsize = 0
 	ndata = 0
+	if (dounderscore):
+		edfstem = stem[:-1] + "_"
+	else:
+		edfstem = stem
 	
 	for i in range(0,nsteps):
 		omega = fromm + (i+0.5)*step
@@ -63,7 +67,7 @@ def tiffToEdf(tiffimagepath, edfimagepath, stem, extension, fromm, to, step, fir
 		im100.header["OmegaStep"] = "%.3f" % step
 		# Save to edf
 		edfimage =  fabio.edfimage.edfimage(im100.data,im100.header)
-		ifile = formatfileedf % (stem, n)
+		ifile = formatfileedf % (edfstem, n)
 		fedf = os.path.join(edfimagepath, ifile)
 		edfimage.write(fedf)
 		print "Data saved in %s" % (ifile)
@@ -110,6 +114,7 @@ def main(argv):
 	parser.add_argument('-e', '--edfimagepath', required=False, help="Path in which to save edf images. Default is %(default)s", default="./")
 	parser.add_argument('-x', '--extension', required=False, help="Extension for tiff files. Default is %(default)s", default="tif")
 	parser.add_argument('-d', '--ndigits', required=False, help="Number of digits for file number. Default is %(default)s", type=int, default=4)
+	parser.add_argument('-u', '--dounderscore', required=False, help="Replace last character of file stem with an underscore. Can be True or False. Default is %(default)s", type=bool, default=False)
 
 	args = vars(parser.parse_args())
 
@@ -122,8 +127,9 @@ def main(argv):
 	step = args['step']
 	first = args['imagefirst']
 	digits = args['ndigits']
+	dounderscore = args['dounderscore']
 
-	tiffToEdf(tiffimagepath, edfimagepath, stem, extension, fromm, to, step, first,digits);
+	tiffToEdf(tiffimagepath, edfimagepath, stem, extension, fromm, to, step, first,digits,dounderscore);
 
 
 # Calling method 1 (used when generating a binary in setup.py)
