@@ -451,17 +451,17 @@ def main(argv):
 	desc="""
 
 Usage:
- - diamondSpotRemoval.py [options] spots: test spot detection parameters
- - diamondSpotRemoval.py [options] plotMask: try to create a mask a plot an overlay of images and corresponding mask
- - diamondSpotRemoval.py  [options] clearMask: create a mask and display images with median and mask removed
- - diamondSpotRemoval.py  [options] save: save new images with median and mask removed in EDF
+ - %(prog)s [options] spots: test spot detection parameters
+ - %(prog)s [options] plotMask: try to create a mask a plot an overlay of images and corresponding mask
+ - %(prog)s  [options] clearMask: create a mask and display images with median and mask removed
+ - %(prog)s  [options] save: save new images with median and mask removed in EDF
 
 Basic examples:
- - diamondSpotRemoval.py -P Edf-P02-Ti-Close -n P02-Ti-02_ -m P02-Ti-02_m20100.edf -f 50 -l 65 spots
- - diamondSpotRemoval.py -P Edf-P02-Ti-Close -n P02-Ti-02_ -m P02-Ti-02_m20100.edf -f 50 -l 65 -s Edf-P02-Ti-Close-Filtered save
+ - %(prog)s -P Edf-P02-Ti-Close -n P02-Ti-02_ -m P02-Ti-02_m20100.edf -f 50 -l 65 spots
+ - %(prog)s -P Edf-P02-Ti-Close -n P02-Ti-02_ -m P02-Ti-02_m20100.edf -f 50 -l 65 -s Edf-P02-Ti-Close-Filtered save
 
 Complex example:
- - diamondSpotRemoval.py -P Edf-P02-Ti-Close -n P02-Ti-02_ -m P02-Ti-02_m20100.edf -f 50 -l 65 --growXY=25 --growXYO=2 --c_rawy=1097 --c_rawz=922 --radius=300 --filtersize=3 -t 1.5 -s Edf-P02-Ti-Close-Filtered/ save
+ - %(prog)s -P Edf-P02-Ti-Close -n P02-Ti-02_ -m P02-Ti-02_m20100.edf -f 50 -l 65 --growXY=25 --growXYO=2 --c_rawy=1097 --c_rawz=922 --radius=300 --filtersize=3 -t 1.5 -s Edf-P02-Ti-Close-Filtered/ save
 
 Typically, you start by testing the spot parameters and improve you match by playing with the threshold and filtersize parameter, and you then try creating a mask.
 
