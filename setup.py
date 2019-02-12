@@ -47,7 +47,7 @@ setup(
     'Science project': 'http://timeless.texure.rocks',
 	},
 	
-	install_requires=['xfab','numpy','scipy','fabio'],
+	install_requires=['xfab','numpy','scipy','fabio','matplotlib'],
 	
 	package_dir = {
 				'TIMEleSS': 'TIMEleSS',
@@ -70,6 +70,7 @@ setup(
 			'timelessTiff2edf = TIMEleSS.diffraction.tiff2edf:run',
 			'timelessMccd2edf = TIMEleSS.diffraction.mccd2edf:run',
 			'timelessAverageEDF = TIMEleSS.diffraction.averageImage:run',
+			'timelessDiamondSpotRemoval = TIMEleSS.diffraction.diamondSpotRemoval:run',
         ]
 		#'gui_scripts': [
 		#    'baz = my_package_gui:start_func',
