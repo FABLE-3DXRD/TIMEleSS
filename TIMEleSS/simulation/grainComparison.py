@@ -273,7 +273,7 @@ def removeDoubleGrains(grains, crystal_system, cutoff, logfile):
 #
 #################################################################
 
-def comparaison(file1, file2, crystal_system, cutoff, outputstem):
+def comparaison(file1, file2, crystal_system, cutoff, outputstem, verbose):
 	"""
 	Function designed to compare the orientations of 2 collections of grains.
 
@@ -299,6 +299,7 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	  crystal_system - see abover
 	  outputstem - stem for output file for the grain comparison
 	  cutoff - mis-orientation below which the two grains are considered identical, in degrees
+	  verbose - save all grain comparison into an output file rather than only matching or non matching grain
 	"""
 	
 	# Prepare output files
@@ -310,8 +311,12 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	logerroneous = open(filename3,'w')
 	filename4 = "%s-%s" % (outputstem , "missing-grains.dat")
 	logmissing = open(filename4,'w')
-	print ("4 output files will be generated: \n- %s,\n- %s,\n- %s,\n- %s\n" % (filename1, filename2, filename3, filename4))
-
+	if (not verbose):
+		print ("4 output files will be generated: \n- %s,\n- %s,\n- %s,\n- %s\n" % (filename1, filename2, filename3, filename4))
+	else:
+		filename5 = "%s-%s" % (outputstem , "verbose.dat")
+		logverbose = open(filename5,'w')
+	
 	# Counting number of grains
 	grains1 = multigrainOutputParser.parseGrains(file1)
 	grains2 = multigrainOutputParser.parseGrains(file2)
@@ -344,6 +349,14 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 		for j in range(0,len(grains1clean)):
 			grain1 = grains1clean[j]
 			U1 = grain1.getU()
+			if (verbose): # We provide an output file all comparisons
+				angle = minMisorientation(U1,U2,crystal_system)
+				logverbose.write("Grain %s of %s\n" % (grain1.getName(), file1))
+				logverbose.write("\tcompared with grain %s of %s\n" % (grain2.getName(), file2))
+				logverbose.write("\tmisorientation: %.2f°\n" % (angle))
+				logverbose.write("U grain 1: \n" + numpy.array2string(U1) + "\n")
+				logverbose.write("U grain 2: \n" + numpy.array2string(U2) + "\n")
+				logverbose.write("\n\n")
 			if (matchGrains(U1, U2, crystal_system, cutoff)):
 				grainMatched.append(j)
 				grains1cleanFound[j] = True
@@ -390,12 +403,17 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	logit(logfile, "- %.1f pc of %s grains not indexed" % (100.-100.*len(goodGrains)/len(grains1clean), file1))
 	logit(logfile, "- %.1f pc of erroneous grains in %s" % (100.*len(erroneousGrains)/len(grains2clean), file2))
 	
-	print ("\n4 output files were generated: \n- %s,\n- %s with the matching grains,\n- %s with erroneous grains,\n- %s with missing grains\n" % (filename1, filename2, filename3, filename4))
+	if (verbose):
+		print ("\n5 output files were generated: \n- %s,\n- %s with the matching grains,\n- %s with erroneous grains,\n- %s with missing grains,\n- %s with verbose grain comparison \n" % (filename1, filename2, filename3, filename4, filename5))
+	else:
+		print ("\n4 output files were generated: \n- %s,\n- %s with the matching grains,\n- %s with erroneous grains,\n- %s with missing grains\n" % (filename1, filename2, filename3, filename4))
 	 
 	logmatching.close()
 	logfile.close()
 	logerroneous.close()
 	logmissing.close()
+	if (verbose):
+		logverbose.close()
 
 
 #################################################################
@@ -424,9 +442,12 @@ def main(argv):
     7: Cubic
 """)
 	
+	
 	parser.add_argument('-o', '--output_stem', required=False, help="Stem for output files. Default is %(default)s", default="comp")
 	
 	parser.add_argument('-m', '--misorientation', required=False, help="Misorientation below which two grains are considered identical, in degrees. Default is %(default)s", default=2.0, type=float)
+	
+	parser.add_argument('-v', '--verbose', required=False, help="Create output file with verbose grain comparison. Can be True or False. Default is  Default is %(default)s", type=bool, default=False)
 
 	args = vars(parser.parse_args())
 
@@ -435,6 +456,7 @@ def main(argv):
 	crystal_system = args['crystal_system']
 	stem = args['output_stem']
 	cutoff = args['misorientation']
+	verbose = args['verbose']
 	
 	if (not(os.path.isfile(file1))):
 		print ("Error: file %s not found" % file1)
@@ -444,7 +466,7 @@ def main(argv):
 		print ("Error: file %s not found" % file2)
 		sys.exit(2)
 
-	comparaison(file1, file2, crystal_system, cutoff, stem)
+	comparaison(file1, file2, crystal_system, cutoff, stem, verbose)
 
 
 # Calling method 1 (used when generating a binary in setup.py)
