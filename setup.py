@@ -72,6 +72,7 @@ setup(
 			'timelessAverageEDF = TIMEleSS.diffraction.averageImage:run',
 			'timelessDiamondSpotRemoval = TIMEleSS.diffraction.diamondSpotRemoval:run',
 			'timelessClearGVEGrains = TIMEleSS.simulation.clearGVEGrains:run',
+			'timelessClearFLTGrains = TIMEleSS.simulation.clearFLTGrains:run',
         ]
 		#'gui_scripts': [
 		#    'baz = my_package_gui:start_func',
