@@ -424,7 +424,7 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem, verbose):
 
 def main(argv):
 	"""
-	Main subroutine
+	Main subroutines
 	"""
 	
 	parser = argparse.ArgumentParser(usage='%(prog)s [options] file1 file2', description="Compare grains between 2 files\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
