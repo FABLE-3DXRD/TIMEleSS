@@ -69,6 +69,7 @@ setup(
 			'timelessGrainSpotterMerge = TIMEleSS.simulation.grainSpotterMerge:run',
 			'timelessTiff2edf = TIMEleSS.diffraction.tiff2edf:run',
 			'timelessMccd2edf = TIMEleSS.diffraction.mccd2edf:run',
+			'timelessEdf2tiffFileSeries = TIMEleSS.diffraction.edf2tiffFileSeries:run',
 			'timelessAverageEDF = TIMEleSS.diffraction.averageImage:run',
 			'timelessDiamondSpotRemoval = TIMEleSS.diffraction.diamondSpotRemoval:run',
 			'timelessClearGVEGrains = TIMEleSS.simulation.clearGVEGrains:run',
