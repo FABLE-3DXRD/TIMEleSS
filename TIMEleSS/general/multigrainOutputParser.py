@@ -114,8 +114,9 @@ def parse_GrainSpotter_log(logfile):
 		a=line.split()
 		numbpeaks = int(a[2])  
 		# for the Grainnumber I have to remove the comma from the value to use it as an interger
-		GrainNumW=(a[1]).strip( ',' )
-		GrainNum=int(GrainNumW[0])
+		GrainNumW=a[1][:-1]
+		GrainNum=int(GrainNumW)
+		#print GrainNum, a[1]
 		grain = grain3DXRD.Grain()
 		grain.setFileName(logfile)
 		grain.setNPeaks(numbpeaks)
