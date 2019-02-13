@@ -33,6 +33,9 @@ import os.path
 import fabio
 import fabio.edfimage
 
+# array operations
+import numpy
+
 #################################################################
 #
 # Specific subroutines
@@ -60,6 +63,8 @@ def averageImage(first,second,new):
 	data1 = im1.getData().astype('int32')
 	data2 = im2.getData().astype('int32')
 	datanew = (data1+data2)/2
+	# Removing data below 0
+	datanew = datanew.clip(min=0)
 	# Creating a header
 	header1 = im1.getHeader()
 	header2 = im2.getHeader()
