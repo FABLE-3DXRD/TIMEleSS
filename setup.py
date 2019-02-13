@@ -76,6 +76,7 @@ setup(
 			'timelessDiamondSpotRemoval = TIMEleSS.diffraction.diamondSpotRemoval:run',
 			'timelessClearGVEGrains = TIMEleSS.simulation.clearGVEGrains:run',
 			'timelessClearFLTGrains = TIMEleSS.simulation.clearFLTGrains:run',
+			'timelessSaveFLTGrains = TIMEleSS.simulation.fltForGrains:run',
         ]
 		#'gui_scripts': [
 		#    'baz = my_package_gui:start_func',
