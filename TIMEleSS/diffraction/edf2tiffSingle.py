@@ -78,7 +78,7 @@ def main(argv):
 	parser = MyParser(usage='%(prog)s file', description="Converts an EDF to TIF\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	# Required arguments
-	parser.add_argument('file', required=True, help="EDF file name (required)", type=str)
+	parser.add_argument('file', help="EDF file name (required)", type=str)
 
 	args = vars(parser.parse_args())
 
