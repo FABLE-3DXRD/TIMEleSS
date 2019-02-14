@@ -74,6 +74,7 @@ setup(
 			'timelessAverageEDF = TIMEleSS.diffraction.averageImage:run',
 			'timelessCreateEmptyImage = TIMEleSS.diffraction.createEmptyImage:run',
 			'timelessDiamondSpotRemoval = TIMEleSS.diffraction.diamondSpotRemoval:run',
+			'timelessDACShadow = TIMEleSS.diffraction.dacShadowMask:run',
 			'timelessClearGVEGrains = TIMEleSS.simulation.clearGVEGrains:run',
 			'timelessClearFLTGrains = TIMEleSS.simulation.clearFLTGrains:run',
 			'timelessSaveFLTGrains = TIMEleSS.simulation.fltForGrains:run',
