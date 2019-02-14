@@ -45,16 +45,22 @@ def cropGVE(grainfile, oldgvefile, newgvefile, verbose):
 		if (verbose):
 			print "Looking at grain %s" % grain.getName()
 		peaks = grain.getPeaks()
+		# Sometimes, GrainSpotter indexes the same peak twice. We need to remove those double indexings
+		peakid = []
 		for peak in peaks:
-			index = idlist.index(peak.getPeakID())
-			if (verbose):
-				print "Trying to remove peak %d from the list of g-vectors" % peak.getPeakID()
+			peakid.append(peak.getPeakID())
+		peakid = list(set(peakid)) # remove duplicates, may loose the ordering but we do not care
+		# Removing assign peaks from the list of g-vectors
+		for thisid in peakid:
 			try:
-				del idlist[index]
-				del peaksgve[index]
+				index = idlist.index(thisid)
 			except:
-				print "Failed removing g-vector ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName())
+				print "Failed removing g-vector ID %d which was found in grain %s" % (thisid, grain.getName())
 				return
+			if (verbose):
+				print "Trying to remove peak %d from the list of g-vectors" % thisid
+			del idlist[index]
+			del peaksgve[index]
 
 	multigrainOutputParser.saveGVE(peaksgve, header, newgvefile)
 
