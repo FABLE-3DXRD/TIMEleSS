@@ -151,7 +151,6 @@ def main(argv):
 	
 	# Parsing command line
 	args = vars(parser.parse_args())
-	files = args['files']
 	
 	stem = args['stem']
 	first = args['first']
