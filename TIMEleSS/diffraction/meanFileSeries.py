@@ -69,7 +69,7 @@ def meanFileSeries(stem,first,last,digits,ext,new,tif):
 	data = (numpy.copy(imedf.data)).astype('int64')
 	# Read the rest
 	for i in range(first+1,last+1):
-		ifile = formatfileedf % (stem, first)
+		ifile = formatfileedf % (stem, i)
 		print "Reading " + ifile
 		if (not(os.path.isfile(ifile))):
 			print ("Error: file %s not found" % ifile)
