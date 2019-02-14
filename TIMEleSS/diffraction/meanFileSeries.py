@@ -42,7 +42,7 @@ import numpy
 #
 #################################################################
 
-def meanFileSeries(stem,first,last,digits,ext,new):
+def meanFileSeries(stem,first,last,digits,ext,new,tif):
 	"""
 	This function calculates the mean for a series of images and saves it in a new file.
 	
@@ -52,6 +52,7 @@ def meanFileSeries(stem,first,last,digits,ext,new):
 	digits: number of digits in file number
 	ext: extension
 	new: new image name (full path, with extension)
+	tif: if true, save as Tiff
 	"""
 	
 	formatfileedf = "%s%0"+str(digits)+"d.edf"
@@ -104,12 +105,17 @@ def meanFileSeries(stem,first,last,digits,ext,new):
 		omPos = None
 	# clipping data to int32 (it should be ok, but should be done in a cleaner way)
 	newdata = (numpy.copy(data)).astype('int32')
-	im3 = fabio.edfimage.edfimage()
-	im3.setData(newdata)
-	im3.setHeader(headernew)
-	im3.save(new)
-	print "Mean image saved in " + ifile
-	
+	if (tif):
+		imtiff = fabio.tifimage.tifimage(newdata,headernew)
+		imtiff.save(new)
+		print "Mean image saved in " + new
+	else:
+		im3 = fabio.edfimage.edfimage()
+		im3.setData(newdata)
+		im3.setHeader(headernew)
+		im3.save(new)
+		print "Mean image saved in " + new
+		
 	return
 	
 	
@@ -137,7 +143,7 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	parser = MyParser(usage='%(prog)s -n sterm -f first -l last -o newedf', description="Takes the mean of multiple EDF images\nHeader parameters such as OmegaMin, OmegaMax, Omega, OmegaPos are reset.\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
+	parser = MyParser(usage='%(prog)s -n sterm -f first -l last -o newfilename', description="Takes the mean of multiple EDF images\nHeader parameters such as OmegaMin, OmegaMax, Omega, OmegaPos are reset.\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	# Required parameters
 	parser.add_argument('-n', '--stem', required=True, help="Stem for images files (required)")
@@ -148,6 +154,7 @@ def main(argv):
 	# Optionnal arguments
 	parser.add_argument('-d', '--ndigits', required=False, help="Number of digits for file number. Default is %(default)s", type=int, default=4)
 	parser.add_argument('-e', '--extension', required=False, help="File extension. Default is %(default)s", type=str, default="edf")
+	parser.add_argument('-t', '--tif', required=False, help="Save in tiff instead of EDF if True. Default is %(default)s", type=bool, default=False)
 	
 	# Parsing command line
 	args = vars(parser.parse_args())
@@ -158,9 +165,10 @@ def main(argv):
 	digits = args['ndigits']
 	ext = args['extension']
 	output = args['output']
+	tif =  args['tif']
 	
 	# Perform the substraction
-	meanFileSeries(stem,first,last,digits,ext,output)
+	meanFileSeries(stem,first,last,digits,ext,output,tif)
 
 
 
