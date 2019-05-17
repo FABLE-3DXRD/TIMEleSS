@@ -88,7 +88,7 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	parser = MyParser(usage='%(prog)s GSFile, oldFLT.flt newFLT.flt', description="Creates a new list of peaks in FLT format, including only peaks which have already been assigned to grains by GrainSpotter\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
+	parser = MyParser(usage='%(prog)s GSFile.log oldFLT.flt newFLT.flt', description="Creates a new list of peaks in FLT format, including only peaks which have already been assigned to grains by GrainSpotter\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	# Required arguments
 	parser.add_argument('gsfile',  help="Name of GrainSpotter output file (required)")
