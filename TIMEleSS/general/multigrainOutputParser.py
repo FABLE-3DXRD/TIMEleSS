@@ -167,8 +167,11 @@ def parse_GrainSpotter_log(logfile):
 			thispeak.setPeakID(int(peakinfo[2]))
 			thispeak.setHKL(int(peakinfo[3]), int(peakinfo[4]), int(peakinfo[5]))
 			thispeak.setTThetaMeasured(float(peakinfo[12]))
+			thispeak.setTThetaPred(float(peakinfo[13]))
 			thispeak.setOmegaMeasured(float(peakinfo[15]))
+			thispeak.setOmegaPred(float(peakinfo[16]))
 			thispeak.setEtaMeasured(float(peakinfo[18]))
+			thispeak.setEtaPred(float(peakinfo[19]))
 			peakList.append(thispeak)
 		grain.setPeaks(peakList)
 		# Extracting the full text from the GrainSpotter logfile. Can be useful to generate new files
