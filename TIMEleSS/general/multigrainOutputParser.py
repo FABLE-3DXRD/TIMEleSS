@@ -28,6 +28,9 @@ Parses various files used in 3D-XRD, dealing with grains
 - gff files
 """
 
+# System functions
+import sys
+
 # Mathematical stuff (for data array)
 import scipy
 import scipy.linalg
@@ -116,6 +119,12 @@ def parse_GrainSpotter_log(logfile):
 		# for the Grainnumber I have to remove the comma from the value to use it as an interger
 		GrainNumW=a[1][:-1]
 		GrainNum=int(GrainNumW)
+		if (numbpeaks < 1):
+			print "\nWarning!!!\n\nGrain %d in %s has only %d peaks!" % (GrainNum, logfile, numbpeaks)
+			print "\nSomething is very wrong with your grain spotter output file"
+			print "I stop here...\n"
+			sys.exit(0)
+			
 		#print GrainNum, a[1]
 		grain = grain3DXRD.Grain()
 		grain.setFileName(logfile)
@@ -139,7 +148,10 @@ def parse_GrainSpotter_log(logfile):
 			UBI[0,i] = float(line1[i])
 			UBI[1,i] = float(line2[i])
 			UBI[2,i] = float(line3[i])
+		#print "UBI = ", UBI
+		#print "BI = ", scipy.dot(UBI,U)
 		B =scipy.linalg.inv(scipy.dot(UBI,U))
+		#print "B = ", B
 		# Setting information
 		grain.setUBBi(U,B,UBI)
 		# extracting the Euler angles phi1 phi phi2
