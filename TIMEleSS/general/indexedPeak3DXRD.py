@@ -109,4 +109,7 @@ class indexedPeak:
 		self.k = k
 		self.l = l
 	
+	def getHKL(self):
+		return [self.h, self.k, self.l]
+	
 		
