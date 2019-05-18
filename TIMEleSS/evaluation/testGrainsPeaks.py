@@ -29,32 +29,184 @@ import sys
 import argparse
 import os.path
 
+# Parsing tools
 from TIMEleSS.general import multigrainOutputParser
 
+# Simple mathematical operations
 import numpy
 
+# Rely on ImageD11 for recalculating the peak positions on detector
 from ImageD11 import transform
 from ImageD11 import parameters
 
+# Plotting routines
 import matplotlib
 import platform
 if platform.system() == 'Linux':
 	matplotlib.use('GTK3Agg')
 import matplotlib.pyplot as plt
-#import mplcursors
 
+# Access to the toolbar buttons in MathPlotLib
+from matplotlib.backend_bases import NavigationToolbar2, Event
+
+
+################################################################
+#
+# Global variables. Set as global to allow interactive changes in plot
+#
+#################################################################
+
+imageD11Pars = "";
+grains = "";
+ngrains = 0;
+peaksflt = "";
+idlist = "";
+graintoplot = 0;
+plotisset = False;
+fig = ""
+
+#################################################################
+#
+# Trick to access the forward and backward keys in mathplotlib and use them to move between grains
+# Inspired from https://stackoverflow.com/questions/14896580/matplotlib-hooking-in-to-home-back-forward-button-events
+#
+#################################################################
+
+forward = NavigationToolbar2.forward # Old forward event
+backward = NavigationToolbar2.back # Old backward event
+
+def new_forward(self, *args, **kwargs):
+    s = 'forward_event'
+    event = Event(s, self)
+    event.foo = 100
+    self.canvas.callbacks.process(s, event)
+    # forward(self, *args, **kwargs) # If you wanted to still call the old forward event
+
+def new_backward(self, *args, **kwargs):
+    s = 'backward_event'
+    event = Event(s, self)
+    event.foo = 100
+    self.canvas.callbacks.process(s, event)
+    # backward(self, *args, **kwargs) # If you wanted to still call the old backward event
+
+NavigationToolbar2.forward = new_forward
+NavigationToolbar2.back = new_backward
+
+NavigationToolbar2.toolitems = (
+	('Home', 'Reset original view', 'home', 'home'), 
+	('Back', 'Previous grain', 'back', 'back'), 
+	('Forward', 'Next grain', 'forward', 'forward'), 
+	(None, None, None, None), 
+	('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'), 
+	('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'), 
+	('Subplots', 'Configure', 'subplots', 'configure_subplots'), 
+	(None, None, None, None), 
+	('Save', 'Save the figure', 'filesave', 'save_figure'))
+
+
+def handle_backward(evt):
+	global ngrains, graintoplot
+	graintoplot = (graintoplot-1) % ngrains
+	plotGrainData()
+	#print evt.foo
+
+def handle_forward(evt):
+	global ngrains, graintoplot
+	graintoplot = (graintoplot+1) % ngrains
+	plotGrainData()
+	#print evt.foo
+
+# TODO: use the configure button to allow changing what is plotted (could be s vs omega, for instance)
+
+
+#################################################################
+#
+# Plotting routines
+#
+#################################################################
+
+
+def makeThePlot(title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings=""):
+	global plotisset, fig
+	if (not plotisset):
+		fig = plt.figure()
+		fig.canvas.mpl_connect('forward_event', handle_forward)
+		fig.canvas.mpl_connect('backward_event', handle_backward)
+	else:
+		fig.clear()
+	# Plotting diffraction rings
+	for ring in rings:
+		plt.plot(ring[1], ring[0], color='black', linestyle='solid', linewidth=0.5)
+	# Adding indexed points
+	plt.scatter(xmeasured, ymeasured, s=60,  marker='o', facecolors='r', edgecolors='r')
+	plt.scatter(xpred, ypred, s=80,  marker='s', facecolors='none', edgecolors='b')
+	# Labels
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.title(title)
+	if (not plotisset):
+		plotisset = True
+		plt.show()
+	else:
+		fig.canvas.draw()
+		fig.canvas.flush_events()
+
+def plotGrainData():
+	global imageD11Pars, grains, ngrains, peaksflt, idlist, graintoplot
+	
+	grain = grains[graintoplot]
+	peaks = grain.getPeaks()
+	npeaks = len(peaks)
+	# Will hold predicted peak positions, ttheta, eta, omega, f, and s
+	tthetaPred = numpy.zeros(npeaks)
+	etaPred =  numpy.zeros(npeaks)
+	omegaPred = numpy.zeros(npeaks)
+	# Will hold measure peak positions, f, and s
+	fmeasured = numpy.zeros(npeaks)
+	smeasured = numpy.zeros(npeaks)
+	# Filling up the array
+	i = 0
+	for peak in peaks:
+		tthetaPred[i] = peak.getTThetaPred()
+		etaPred[i] = peak.getEtaPred()
+		omegaPred[i] = peak.getOmegaPred()
+		try:
+			index = idlist.index(peak.getPeakID())
+			smeasured[i] = peaksflt[index]['sc']
+			fmeasured[i] = peaksflt[index]['fc']
+		except IndexError:
+			print "Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName())
+			return
+		i += 1
+	# Calculating predicted peak positions from angles
+	(fpred, spred) = transform.compute_xyz_from_tth_eta(tthetaPred, etaPred, omegaPred, **imageD11Pars.parameters)
+	
+	# Preparing information to add diffraction rings
+	ringstth = numpy.unique(tthetaPred)
+	rings = []
+	for tth in ringstth:
+		eta = numpy.arange(0., 362., 2.)
+		ttheta = numpy.full((len(eta)), tth)
+		omega = numpy.full((len(eta)), 0.)
+		rings.append(transform.compute_xyz_from_tth_eta(ttheta, eta, omega, **imageD11Pars.parameters))
+		
+	# Ready to plot, using multithreading to be able to have multiple plots, did not work!!
+	makeThePlot("Grain %s" % (graintoplot+1), 'f (pixes)', 's (pixes)', smeasured, fmeasured, spred, fpred, rings)
+
+#################################################################
+#
+# Parse input files and move one
+#
+#################################################################
 
 def plotFltGrains(gsfile, FLT, par):
+	global imageD11Pars, grains, ngrains, peaksflt, idlist, graintoplot
 	# Reading files
 	imageD11Pars = parameters.read_par_file(par)
 	grains = multigrainOutputParser.parse_GrainSpotter_log(gsfile)
 	print ("Parsed grains from %s" % gsfile)
 	ngrains =  len(grains)
 	print ("Number of grains: %d" % ngrains)
-	
-	
-	
-	
 	[peaksflt,idlist,header] = multigrainOutputParser.parseFLT(FLT)
 	print ("Parsed peaks from %s" % FLT)
 	print ("Number of peaks: %d" % len(peaksflt))
@@ -69,81 +221,24 @@ def plotFltGrains(gsfile, FLT, par):
 		return
 	#print iSC, iFC
 
-	while (1):
-		txt = raw_input("Grain number (1-%d) ? " % ngrains)
+	test=False
+	while (test==False):
+		txt = raw_input("Grain number (1-%d, 0 to stop) ? " % ngrains)
 		try:
-			n = int(txt)-1
-			if ((n<0) or (n>ngrains)):
+			graintoplot = int(txt)-1
+			if (graintoplot == -1):
+				return
+			if ((graintoplot<0) or (graintoplot>ngrains)):
 				print ("Input should be between 1 and %d" % ngrains)
 			else:
-				grain = grains[n]
-				peaks = grain.getPeaks()
-				npeaks = len(peaks)
-				# Will hold predicted peak positions, ttheta, eta, omega, f, and s
-				tthetaPred = numpy.zeros(npeaks)
-				etaPred =  numpy.zeros(npeaks)
-				omegaPred = numpy.zeros(npeaks)
-				# Will hold measure peak positions, f, and s
-				fmeasured = numpy.zeros(npeaks)
-				smeasured = numpy.zeros(npeaks)
-				# Filling up the array
-				i = 0
-				for peak in peaks:
-					tthetaPred[i] = peak.getTThetaPred()
-					etaPred[i] = peak.getEtaPred()
-					omegaPred[i] = peak.getOmegaPred()
-					try:
-						index = idlist.index(peak.getPeakID())
-						smeasured[i] = peaksflt[index]['sc']
-						fmeasured[i] = peaksflt[index]['fc']
-					except IndexError:
-						print "Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName())
-						return
-					i += 1
-				(fpred, spred) = transform.compute_xyz_from_tth_eta(tthetaPred, etaPred, omegaPred, **imageD11Pars.parameters)
-
-				plt.scatter(fmeasured, smeasured, s=60,  marker='o', facecolors='r', edgecolors='r')
-				plt.scatter(fpred, spred, s=80,  marker='s', facecolors='none', edgecolors='b')
-				plt.xlabel('f coordinate')
-				plt.ylabel('s coordinate')
-				plt.title("Grain %s" % (n+1))
-				plt.show()
+				plotGrainData()
+				test = True
+				
 		except ValueError:
 			print ("Input is wrong" )
 	
 	# Plot peaks from FLT, max intensity, sigs  sigf  sigo are sigmas calculated from the second moment
 	# !! a +1 is added in the moment calculation to avoid 0 width peaks (returns sqrt(variant + 1))
-	
-	
-	sys.exit(0)
-		
-
-
-	print "Detecting peaks which have been assigned to grains in %s" % gsfile
-	basename, file_extension = os.path.splitext(newFLT)
-
-	newpeaksflt = []
-	for grain in grains:
-		peaksgrain = []
-		if (verbose):
-			print "Looking at grain %s" % grain.getName()
-		peaks = grain.getPeaks()
-		for peak in peaks:
-			if (verbose):
-				print "Trying to get info for peak %d from the list of peaks" % peak.getPeakID()
-			try:
-				index = idlist.index(peak.getPeakID())
-			except IndexError:
-				print "Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName())
-				return
-			newpeaksflt.append(peaksflt[index])
-			peaksgrain.append(peaksflt[index])
-		if (saveall):
-			grainfltname = basename + "-" + grain.getName() + ".flt"
-			multigrainOutputParser.saveFLT(peaksgrain, header, grainfltname)
-		#print len(newpeaksflt)
-
-	multigrainOutputParser.saveFLT(newpeaksflt, header, newFLT)
 	
 
 #################################################################
@@ -180,7 +275,6 @@ def main(argv):
 	gsfile = args['gsfile']
 	FLT = args['FLT']
 	par = args['par']
-
 
 	plotFltGrains(gsfile, FLT, par)
 
