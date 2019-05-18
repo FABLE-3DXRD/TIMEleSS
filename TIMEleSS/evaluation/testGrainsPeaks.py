@@ -64,6 +64,7 @@ idlist = "";
 graintoplot = 0;
 plotisset = False;
 fig = ""
+annotation = ""
 
 #################################################################
 #
@@ -116,6 +117,35 @@ def handle_forward(evt):
 	plotGrainData()
 	#print evt.foo
 
+def onpick(event):
+	global annotation
+	
+	thisdataset = event.artist
+	index = event.ind
+	posX = (thisdataset.get_offsets())[index][0][0]
+	posY = (thisdataset.get_offsets())[index][0][1]
+	# print posX, posY
+	# print('Clicked on peak number : ', index)
+	grain = grains[graintoplot]
+	peaks = grain.getPeaks()
+	peak = peaks[index[0]]
+	tthetaPred = peak.getTThetaPred()
+	etaPred = peak.getEtaPred()
+	omegaPred = peak.getOmegaPred()
+	tthetaMeas = peak.getTThetaMeasured()
+	etaMeas = peak.getEtaMeasured()
+	omegaMeas = peak.getOmegaMeasured()
+	hkl = peak.getHKL()
+	text = "Peak (%d,%d,%d)\nttheta = (%.1f, %.1f, %.1f)\neta = (%.1f, %.1f, %.1f)\nomega = (%.1f, %.1f, %.1f)\n(pred., meas., diff.)" % (hkl[0], hkl[1], hkl[2], tthetaPred, tthetaMeas, tthetaPred-tthetaMeas, etaPred, etaMeas, etaPred-etaMeas, omegaPred, omegaMeas, omegaPred - omegaMeas)
+	# Clear the plot and redraw (to remove old annotations)
+	if (annotation != ""):
+		annotation.remove()
+	# Add the label
+	annotation = plt.text(posX, posY, text, fontsize=9, bbox=dict(boxstyle="round", ec=(1., 0.5, 0.5), fc=(1., 1., 1.), alpha=0.9))
+	
+	fig.canvas.draw()
+	
+	
 # TODO: use the configure button to allow changing what is plotted (could be s vs omega, for instance)
 
 
@@ -127,11 +157,12 @@ def handle_forward(evt):
 
 
 def makeThePlot(title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings=""):
-	global plotisset, fig
+	global plotisset, fig, annotation
 	if (not plotisset):
 		fig = plt.figure()
 		fig.canvas.mpl_connect('forward_event', handle_forward)
 		fig.canvas.mpl_connect('backward_event', handle_backward)
+		fig.canvas.mpl_connect('pick_event', onpick)
 	else:
 		fig.clear()
 	# Plotting diffraction rings
@@ -139,7 +170,7 @@ def makeThePlot(title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings
 		plt.plot(ring[1], ring[0], color='black', linestyle='solid', linewidth=0.5)
 	# Adding indexed points
 	plt.scatter(xmeasured, ymeasured, s=60,  marker='o', facecolors='r', edgecolors='r')
-	plt.scatter(xpred, ypred, s=80,  marker='s', facecolors='none', edgecolors='b')
+	plt.scatter(xpred, ypred, s=80,  marker='s', facecolors='none', edgecolors='b', picker=5) # Picker to allow users to pick on a point
 	# Labels
 	plt.xlabel(xlabel)
 	plt.ylabel(ylabel)
@@ -148,8 +179,10 @@ def makeThePlot(title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings
 		plotisset = True
 		plt.show()
 	else:
+		annotation = ""
 		fig.canvas.draw()
 		fig.canvas.flush_events()
+
 
 def plotGrainData():
 	global imageD11Pars, grains, ngrains, peaksflt, idlist, graintoplot
