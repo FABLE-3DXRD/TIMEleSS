@@ -224,7 +224,7 @@ def plotGrainData():
 		rings.append(transform.compute_xyz_from_tth_eta(ttheta, eta, omega, **imageD11Pars.parameters))
 		
 	# Ready to plot, using multithreading to be able to have multiple plots, did not work!!
-	makeThePlot("Grain %s" % (graintoplot+1), 'f (pixes)', 's (pixes)', smeasured, fmeasured, spred, fpred, rings)
+	makeThePlot("Grain %s" % (graintoplot+1), 'f (pixels)', 's (pixels)', smeasured, fmeasured, spred, fpred, rings)
 
 #################################################################
 #
@@ -232,28 +232,9 @@ def plotGrainData():
 #
 #################################################################
 
-def plotFltGrains(gsfile, FLT, par):
-	global imageD11Pars, grains, ngrains, peaksflt, idlist, graintoplot
-	# Reading files
-	imageD11Pars = parameters.read_par_file(par)
-	grains = multigrainOutputParser.parse_GrainSpotter_log(gsfile)
-	print ("Parsed grains from %s" % gsfile)
-	ngrains =  len(grains)
-	print ("Number of grains: %d" % ngrains)
-	[peaksflt,idlist,header] = multigrainOutputParser.parseFLT(FLT)
-	print ("Parsed peaks from %s" % FLT)
-	print ("Number of peaks: %d" % len(peaksflt))
+def plotFltGrains():
+	global ngrains
 	
-	# Locating the columns with detector positions in flt file
-	headerarr = header.split()
-	try:
-		iSC = headerarr.index("sc") - 1
-		iFC = headerarr.index("fc") - 1
-	except:
-		print ("Can not find sc and fc columns in %s" % FLT)
-		return
-	#print iSC, iFC
-
 	test=False
 	while (test==False):
 		txt = raw_input("Grain number (1-%d, 0 to stop) ? " % ngrains)
@@ -269,10 +250,36 @@ def plotFltGrains(gsfile, FLT, par):
 				
 		except ValueError:
 			print ("Input is wrong" )
-	
+
+	# Comment from John if we want to include peak intensity and peak shapes
 	# Plot peaks from FLT, max intensity, sigs  sigf  sigo are sigmas calculated from the second moment
 	# !! a +1 is added in the moment calculation to avoid 0 width peaks (returns sqrt(variant + 1))
+
+
+
+def parseInputFiles(gsfile, FLT, par):
+	global imageD11Pars, grains, ngrains, peaksflt, idlist, graintoplot
 	
+	imageD11Pars = parameters.read_par_file(par)
+
+	grains = multigrainOutputParser.parse_GrainSpotter_log(gsfile)
+	print ("Parsed grains from %s" % gsfile)
+	ngrains =  len(grains)
+	print ("Number of grains: %d" % ngrains)
+
+	[peaksflt,idlist,header] = multigrainOutputParser.parseFLT(FLT)
+	print ("Parsed peaks from %s" % FLT)
+	print ("Number of peaks: %d" % len(peaksflt))
+	
+	# Locating the columns with detector positions in flt file
+	# headerarr = header.split()
+	#try:
+	#	iSC = headerarr.index("sc") - 1
+	#	iFC = headerarr.index("fc") - 1
+	#except:
+	#	print ("Can not find sc and fc columns in %s" % FLT)
+	#	return
+
 
 #################################################################
 #
@@ -309,7 +316,8 @@ def main(argv):
 	FLT = args['FLT']
 	par = args['par']
 
-	plotFltGrains(gsfile, FLT, par)
+	test = parseInputFiles(gsfile, FLT, par)
+	plotFltGrains()
 
 
 # Calling method 1 (used when generating a binary in setup.py)
