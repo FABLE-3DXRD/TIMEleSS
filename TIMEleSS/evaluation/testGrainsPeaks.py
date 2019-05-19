@@ -68,8 +68,12 @@ annotation = ""
 
 #################################################################
 #
-# Trick to access the forward and backward keys in mathplotlib and use them to move between grains
+# Various matplotlib tricks to adapt the GUI to what we want
+#
+# Access the forward and backward keys in mathplotlib and use them to move between grains
 # Inspired from https://stackoverflow.com/questions/14896580/matplotlib-hooking-in-to-home-back-forward-button-events
+#
+# Click on peak and get information on h,k,l, diffraction angles, and indexing errors
 #
 #################################################################
 
@@ -117,15 +121,24 @@ def handle_forward(evt):
 	plotGrainData()
 	#print evt.foo
 
+"""
+Picking events on data in plot
+- Locates the peak that is being selected
+- Pulls out indexing information for this peak (h, k, l, predicted and measured angles)
+- Displays information in the plot, next to the peak
+
+Parameters
+	event
+"""
 def onpick(event):
 	global annotation
 	
+	# Locating peak
 	thisdataset = event.artist
 	index = event.ind
 	posX = (thisdataset.get_offsets())[index][0][0]
 	posY = (thisdataset.get_offsets())[index][0][1]
-	# print posX, posY
-	# print('Clicked on peak number : ', index)
+	# Extracting indexing info for this peak
 	grain = grains[graintoplot]
 	peaks = grain.getPeaks()
 	peak = peaks[index[0]]
@@ -136,13 +149,13 @@ def onpick(event):
 	etaMeas = peak.getEtaMeasured()
 	omegaMeas = peak.getOmegaMeasured()
 	hkl = peak.getHKL()
+	# Preparing text
 	text = "Peak (%d,%d,%d)\nttheta = (%.1f, %.1f, %.1f)\neta = (%.1f, %.1f, %.1f)\nomega = (%.1f, %.1f, %.1f)\n(pred., meas., diff.)" % (hkl[0], hkl[1], hkl[2], tthetaPred, tthetaMeas, tthetaPred-tthetaMeas, etaPred, etaMeas, etaPred-etaMeas, omegaPred, omegaMeas, omegaPred - omegaMeas)
-	# Clear the plot and redraw (to remove old annotations)
+	# Clearing annotation if there is one already
 	if (annotation != ""):
 		annotation.remove()
-	# Add the label
+	# Add the peak information to the plot
 	annotation = plt.text(posX, posY, text, fontsize=9, bbox=dict(boxstyle="round", ec=(1., 0.5, 0.5), fc=(1., 1., 1.), alpha=0.9))
-	
 	fig.canvas.draw()
 	
 	
@@ -156,6 +169,19 @@ def onpick(event):
 #################################################################
 
 
+"""
+Prepares a plot with matplotlib
+
+Parameters
+	- title
+	- xlabel
+	- ylabel
+	- xmeasured: list of measured x positions of peaks
+	- ymeasured: list of measured y positions of peaks
+	- xpred: list of predicted x positions of peaks
+	- ypred: list of predictedy positions of peaks
+	- list of 2theta rings to plot, for each ring, 2 elements list of x and list of y
+"""
 def makeThePlot(title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings=""):
 	global plotisset, fig, annotation
 	if (not plotisset):
@@ -175,6 +201,7 @@ def makeThePlot(title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings
 	plt.xlabel(xlabel)
 	plt.ylabel(ylabel)
 	plt.title(title)
+	# Ready to plot
 	if (not plotisset):
 		plotisset = True
 		plt.show()
@@ -184,7 +211,7 @@ def makeThePlot(title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings
 		fig.canvas.flush_events()
 
 
-def plotGrainData():
+def plotGrainDataSF():
 	global imageD11Pars, grains, ngrains, peaksflt, idlist, graintoplot
 	
 	grain = grains[graintoplot]
@@ -225,6 +252,49 @@ def plotGrainData():
 		
 	# Ready to plot, using multithreading to be able to have multiple plots, did not work!!
 	makeThePlot("Grain %s" % (graintoplot+1), 'f (pixels)', 's (pixels)', smeasured, fmeasured, spred, fpred, rings)
+
+
+def plotGrainData():
+	global imageD11Pars, grains, ngrains, peaksflt, idlist, graintoplot
+	
+	grain = grains[graintoplot]
+	peaks = grain.getPeaks()
+	npeaks = len(peaks)
+	# Will hold predicted peak positions, ttheta, eta, omega, f, and s
+	tthetaPred = numpy.zeros(npeaks)
+	etaPred =  numpy.zeros(npeaks)
+	omegaPred = numpy.zeros(npeaks)
+	# Will hold measure peak positions, f, and s
+	fsmeasured = numpy.zeros(2,npeaks)
+	# Filling up the array
+	i = 0
+	for peak in peaks:
+		tthetaPred[i] = peak.getTThetaPred()
+		etaPred[i] = peak.getEtaPred()
+		omegaPred[i] = peak.getOmegaPred()
+		try:
+			index = idlist.index(peak.getPeakID())
+			fsmeasured[i][1] = peaksflt[index]['sc']
+			fsmeasured[i][0] = peaksflt[index]['fc']
+		except IndexError:
+			print "Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName())
+			return
+		i += 1
+	# Calculating 2theta and eta for experimental peaks
+	(tthetaexp, etaexp) = transform. compute_tth_eta(peaks, **imageD11Pars.parameters)
+	
+	# Preparing information to add diffraction rings
+	ringstth = numpy.unique(tthetaPred)
+	rings = []
+	for tth in ringstth:
+		eta = numpy.arange(0., 362., 2.)
+		ttheta = numpy.full((len(eta)), tth)
+		omega = numpy.full((len(eta)), 0.)
+		rings.append(transform.compute_xyz_from_tth_eta(ttheta, eta, omega, **imageD11Pars.parameters))
+		
+	# Ready to plot, using multithreading to be able to have multiple plots, did not work!!
+	makeThePlot("Grain %s" % (graintoplot+1), '2theta (degrees)', 'eta (degrees)', tthetaexp, etaexp, tthetaPred, etaPred)
+	
 
 #################################################################
 #
