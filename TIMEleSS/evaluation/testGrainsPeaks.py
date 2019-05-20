@@ -53,12 +53,12 @@ from matplotlib.backend_bases import NavigationToolbar2, Event
 # Various matplotlib tricks to adapt the GUI to what we want
 #
 # Access the forward and backward keys in mathplotlib and use them to move between grains
-# Inspired from https://stackoverflow.com/questions/14896580/matplotlib-hooking-in-to-home-back-forward-button-events
+# Inspired from 
+# - https://stackoverflow.com/questions/14896580/matplotlib-hooking-in-to-home-back-forward-button-events
+# - https://stackoverflow.com/questions/37506260/adding-an-item-in-matplotlib%C2%B4s-toolbar
 #
 # Click on peak and get information on h,k,l, diffraction angles, and indexing errors
 #
-forward = NavigationToolbar2.forward # Old forward event
-backward = NavigationToolbar2.back # Old backward event
 
 def new_forward(self, *args, **kwargs):
 	s = 'forward_event'
@@ -74,8 +74,14 @@ def new_backward(self, *args, **kwargs):
 	self.canvas.callbacks.process(s, event)
 	# backward(self, *args, **kwargs) # If you wanted to still call the old backward event
 
+def configure_plot(self, *args, **kwargs):
+	s = 'configure_event'
+	event = Event(s, self)
+	self.canvas.callbacks.process(s, event)
+
 NavigationToolbar2.forward = new_forward
 NavigationToolbar2.back = new_backward
+NavigationToolbar2.configure = configure_plot
 
 NavigationToolbar2.toolitems = (
 	('Home', 'Reset original view', 'home', 'home'), 
@@ -84,7 +90,8 @@ NavigationToolbar2.toolitems = (
 	(None, None, None, None), 
 	('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'), 
 	('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'), 
-	('Subplots', 'Configure', 'subplots', 'configure_subplots'), 
+	(None, None, None, None), 
+	('Configure', 'Configure', 'subplots', 'configure'), # Replacing the subplots configuration with my own configure_plot
 	(None, None, None, None), 
 	('Save', 'Save the figure', 'filesave', 'save_figure'))
 
@@ -264,10 +271,10 @@ class plotGrainWindow:
 	def makeThePlot(self,title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings=""):
 		# Preparing a plot window and event processing
 		if (not self.plotisset):
-			self.fig = plt.figure()
+			self.fig = plt.figure()     
 			self.fig.canvas.mpl_connect('forward_event', self.handle_forward)
 			self.fig.canvas.mpl_connect('backward_event', self.handle_backward)
-			self.fig.canvas.mpl_connect('pick_event', self.onpick)
+			self.fig.canvas.mpl_connect('pick_event', self.onpick) 
 		else:
 			self.fig.clear()
 		# Plotting diffraction rings
