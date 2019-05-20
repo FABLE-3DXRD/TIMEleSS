@@ -49,7 +49,11 @@ import matplotlib.pyplot as plt
 # Access to the toolbar buttons in MathPlotLib
 from matplotlib.backend_bases import NavigationToolbar2, Event
 
-#
+# Dialog to configure plot
+import Tkinter
+import tkSimpleDialog
+from PyQt4.QtGui import (QLineEdit, QPushButton, QApplication, QVBoxLayout, QDialog)
+
 # Various matplotlib tricks to adapt the GUI to what we want
 #
 # Access the forward and backward keys in mathplotlib and use them to move between grains
@@ -95,6 +99,29 @@ NavigationToolbar2.toolitems = (
 	(None, None, None, None), 
 	('Save', 'Save the figure', 'filesave', 'save_figure'))
 
+
+class configurePlotDialog(QDialog):
+
+	def __init__(self, parent=None):
+		super(configurePlotDialog, self).__init__(parent)
+		# Create widgets
+		self.edit = QLineEdit("Write my name here")
+		self.button = QPushButton("Show Greetings")
+		# Create layout and add widgets
+		layout = QVBoxLayout()
+		layout.addWidget(self.edit)
+		layout.addWidget(self.button)
+		# Set dialog layout
+		self.setLayout(layout)
+		# Add button signal to greetings slot
+		self.button.clicked.connect(self.greetings)
+
+	# Greets the user
+	def greetings(self):
+		print ("Hello %s" % self.edit.text())
+
+
+
 #################################################################
 #
 # Class definition
@@ -117,7 +144,7 @@ class plotGrainWindow:
 		self.plotisset = False;		# Did we start a plot window?
 		self.fig = ""				# Figure in which to plot
 		self.annotation = ""		# Annotation in the figure
-		self.whatoplot = ""			# Choice of "etavsttheta", "omegavsttheta", default (s vs. f)
+		self.whatoplot = "svsf"			# Choice of "etavsttheta", "omegavsttheta", default (svsf)
 
 	"""
 	Parse input files
@@ -274,6 +301,7 @@ class plotGrainWindow:
 			self.fig = plt.figure()     
 			self.fig.canvas.mpl_connect('forward_event', self.handle_forward)
 			self.fig.canvas.mpl_connect('backward_event', self.handle_backward)
+			self.fig.canvas.mpl_connect('configure_event', self.handle_configure)
 			self.fig.canvas.mpl_connect('pick_event', self.onpick) 
 		else:
 			self.fig.clear()
@@ -300,6 +328,16 @@ class plotGrainWindow:
 			self.annotation = ""
 			self.fig.canvas.draw()
 			self.fig.canvas.flush_events()
+
+	def handle_configure(self,evt):
+		# Tested various ways of dealing with dialogs. Not very satisfied. Need to move the app into a GUI
+		# Create and show the form
+		#dialog = configurePlotDialog()
+		#dialog.show()
+		#root = Tkinter.Tk()
+		#d = ConfigurePlotDialog(root, self.graintoplot, self.whatoplot)
+		#root.withdraw()
+		#print d.result
 
 	"""
 	Event processing when left arrow is click (move to previous grain)
@@ -393,6 +431,7 @@ def main(argv):
 	par = args['par']
 	p = args['plot']
 	
+	
 	plotWindow = plotGrainWindow()
 	test = plotWindow.parseInputFiles(gsfile, FLT, par)
 	if (p==2):
@@ -400,6 +439,13 @@ def main(argv):
 	elif (p==3):
 		plotWindow.setPlotType("omegavsttheta")
 	plotWindow.selectGrainAndPlot()
+	
+	# Create the Qt Application (we need to embed the plot inside an application to fire dialogs)
+	# app = QApplication(sys.argv)
+	
+	# Run the main Qt loop
+	# sys.exit(app.exec_())
+	
 
 
 # Calling method 1 (used when generating a binary in setup.py)
