@@ -48,6 +48,9 @@ class indexedPeak:
 		self.omegameasured = 0.
 		self.etameasured = 0.
 		self.tthetameasured = 0.
+		self.omegapred = 0.
+		self.etapred = 0.
+		self.tthetapred = 0.
 		self.num = 0
 		self.gvpeakid = 0
 		self.peakid = 0
@@ -86,9 +89,27 @@ class indexedPeak:
 	def getTThetaMeasured(self):
 		return self.tthetameasured
 	
+	def setOmegaPred(self,o):
+		self.omegapred = o
+	def getOmegaPred(self):
+		return self.omegapred
+	
+	def setEtaPred(self,o):
+		self.etapred = o
+	def getEtaPred(self):
+		return self.etapred
+		
+	def setTThetaPred(self,o):
+		self.tthetapred = o
+	def getTThetaPred(self):
+		return self.tthetapred
+	
 	def setHKL(self,h,k,l):
 		self.h = h
 		self.k = k
 		self.l = l
+	
+	def getHKL(self):
+		return [self.h, self.k, self.l]
 	
 		
