@@ -32,35 +32,46 @@ import os.path
 # Actual grain testing functions
 import testGrainsPeaks
 
-# Simple mathematical operations
-import numpy
-
 # Plotting routines
 import matplotlib
 matplotlib.use("Qt5Agg")
-
 from matplotlib.figure import Figure
-
 from matplotlib.backend_bases import key_press_handler, Event
-
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
-# Access to the toolbar buttons in MathPlotLib
-from matplotlib.backend_bases import NavigationToolbar2
-
-
-
 # PyQT graphical interface
-# import PyQt4.QtGui
-
-import PyQt5.QtWidgets # import (QLineEdit, QPushButton, QApplication, QVBoxLayout, QDialog)
-# import PyQt5.QtWidgets
-# import PyQt5.QtCore
+import PyQt5.QtWidgets 
+import PyQt5.QtCore
 
 
-NavigationToolbar2.toolitems = (
+
+# Various matplotlib tricks to adapt the GUI to what we want
+#
+# Access the forward and backward keys in mathplotlib and use them to move between grains
+# Inspired from 
+# - https://stackoverflow.com/questions/14896580/matplotlib-hooking-in-to-home-back-forward-button-events
+# - https://stackoverflow.com/questions/37506260/adding-an-item-in-matplotlib%C2%B4s-toolbar
+#
+# Click on peak and get information on h,k,l, diffraction angles, and indexing errors
+#
+
+def new_forward(self, *args, **kwargs):
+	s = 'forward_event'
+	event = Event(s, self)
+	event.foo = 100
+	self.canvas.callbacks.process(s, event)
+	# forward(self, *args, **kwargs) # If you wanted to still call the old forward event
+
+def new_backward(self, *args, **kwargs):
+	s = 'backward_event'
+	event = Event(s, self)
+	event.foo = 100
+	self.canvas.callbacks.process(s, event)
+	# backward(self, *args, **kwargs) # If you wanted to still call the old backward event
+
+NavigationToolbar.toolitems = (
 	('Home', 'Reset original view', 'home', 'home'), 
 	('Back', 'Previous grain', 'back', 'back'), 
 	('Forward', 'Next grain', 'forward', 'forward'), 
@@ -68,63 +79,101 @@ NavigationToolbar2.toolitems = (
 	('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'), 
 	('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'), 
 	(None, None, None, None), 
-	('Configure', 'Configure', 'subplots', 'configure'), # Replacing the subplots configuration with my own configure_plot
-	(None, None, None, None), 
-	('Save', 'Save the figure', 'filesave', 'save_figure'))
+	('Save', 'Save the figure', 'filesave', 'save_figure'),
+	(None, None, None, None))
 
-class configurePlotDialog(PyQt5.QtWidgets.QDialog):
-
-	def __init__(self, parent=None):
-		super(configurePlotDialog, self).__init__(parent)
-		# Create widgets
-		self.edit = PyQt5.QtWidgets.QLineEdit("Write my name here")
-		self.button = PyQt5.QtWidgets.QPushButton("Show Greetings")
-		# Create layout and add widgets
-		layout = PyQt5.QtWidgets.QVBoxLayout()
-		layout.addWidget(self.edit)
-		layout.addWidget(self.button)
-		# Set dialog layout
-		self.setLayout(layout)
-		# Add button signal to greetings slot
-		self.button.clicked.connect(self.greetings)
-
-	# Greets the user
-	def greetings(self):
-		print ("Hello %s" % self.edit.text())
+#################################################################
+#
+# Class to build the Graphical User Interface
+#
+#################################################################
 
 
 class plotGrainData(PyQt5.QtWidgets.QMainWindow):
 	
-	def __init__(self, grainsData, parent=None):
+	"""
+	Constructor
+	
+	Parmeters:
+	- grainsData: a object of type grainPlotData, defined in testGrainsPeaks, for which input files have been read
+	- grainN: the grain number to start with (put 1 if unknown)
+	- plotwhat: what to plot, choice of "etavsttheta", "omegavsttheta", or default ("svsf")
+	"""
+	def __init__(self, grainsData, grainN, plotwhat, parent=None):
 		PyQt5.QtWidgets.QMainWindow.__init__(self, parent)
 		self.annotation = ""
 		self.grainsData = grainsData
+		self.ngrains = self.grainsData.getNGrains()
+		self.graintoplot = grainN-1
+		self.whatoplot = plotwhat
 		self.create_main_frame()
 		self.on_draw()
 		self.show()
 
+	"""
+	Builds up the GUI
+	"""
 	def create_main_frame(self):
 		self.main_frame = PyQt5.QtWidgets.QWidget()
 		self.fig = Figure((8.0, 8.0), dpi=100,tight_layout=True,edgecolor='w',facecolor='w')
+		
+		grainLabel = PyQt5.QtWidgets.QLabel("Grain (1-%d) : " % self.ngrains, self)
+		self.grainNBox = PyQt5.QtWidgets.QLineEdit("%d" % (self.graintoplot+1), self)
+		self.grainNBox.returnPressed.connect(self.new_grain)
+		buttonP = PyQt5.QtWidgets.QPushButton('Previous', self)
+		buttonP.setToolTip('Move to previous grain')
+		buttonP.clicked.connect(self.handle_backward)
+		buttonN = PyQt5.QtWidgets.QPushButton('Next', self)
+		buttonN.setToolTip('Move to next grain')
+		buttonN.clicked.connect(self.handle_forward)
+		plotLabel = PyQt5.QtWidgets.QLabel("Plot", self)
+		self.plotWhatBox = PyQt5.QtWidgets.QComboBox()
+		self.plotWhatBox.addItem("s vs f", "svsf")
+		self.plotWhatBox.addItem("Eta vs. 2 theta", "etavsttheta")
+		self.plotWhatBox.addItem("Omega vs. 2 theta", "omegavsttheta")
+		self.plotWhatBox.currentIndexChanged.connect(self.plotselectionchange)
+
+		hlay = PyQt5.QtWidgets.QHBoxLayout()
+		hlay.addWidget(grainLabel)
+		hlay.addWidget(buttonP)
+		hlay.addWidget(self.grainNBox)
+		hlay.addWidget(buttonN)
+		hlay.addItem(PyQt5.QtWidgets.QSpacerItem(300, 10, PyQt5.QtWidgets.QSizePolicy.Expanding))
+		hlay.addWidget(plotLabel)
+		hlay.addWidget(self.plotWhatBox)
+		
 		self.canvas = FigureCanvas(self.fig)
 		self.canvas.setParent(self.main_frame)
 		self.canvas.setFocusPolicy(PyQt5.QtCore.Qt.StrongFocus)
 		self.canvas.setFocus()
+		self.canvas.mpl_connect('pick_event', self.on_pick) 
+		self.fig.canvas.mpl_connect('forward_event', self.handle_forward)
+		self.fig.canvas.mpl_connect('backward_event', self.handle_backward)
 
 		self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
+		self.mpl_toolbar.forward = new_forward
+		self.mpl_toolbar.back = new_backward
 
-		self.canvas.mpl_connect('key_press_event', self.on_key_press)
-		self.canvas.mpl_connect('pick_event', self.on_pick) 
+		windowLabel = PyQt5.QtWidgets.QLabel("This is part of the TIMEleSS tools <a href=\"http://timeless.texture.rocks/\">http://timeless.texture.rocks/</a>", self)
+		windowLabel.setOpenExternalLinks(True)
+		windowLabel.setAlignment(PyQt5.QtCore.Qt.AlignRight | PyQt5.QtCore.Qt.AlignVCenter)
 
-		vbox = PyQt5.QtWidgets.QVBoxLayout()
+		vbox = PyQt5.QtWidgets.QVBoxLayout()		
+		vbox.addLayout(hlay)
 		vbox.addWidget(self.canvas)  # the matplotlib canvas
 		vbox.addWidget(self.mpl_toolbar)
+		vbox.addWidget(windowLabel)
+
 		self.main_frame.setLayout(vbox)
 		self.setCentralWidget(self.main_frame)
-
-
+		
+	"""
+	Draws or redraws the plot
+	"""
 	def on_draw(self):
-		[title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings] = self.grainsData.getPlotData()
+		# Getting plot data
+		[title, xlabel, ylabel, xmeasured, ymeasured, xpred, ypred, rings] = self.grainsData.getPlotData(self.graintoplot, self.whatoplot)
+		# Clearing plot
 		self.fig.clear()
 		self.axes = self.fig.add_subplot(111)
 		
@@ -140,9 +189,13 @@ class plotGrainData(PyQt5.QtWidgets.QMainWindow):
 		self.axes.set_xlabel(xlabel)
 		self.axes.set_ylabel(ylabel)
 		self.axes.set_title(title, loc='left')
-		self.axes.set_aspect(1.0)
-		self.axes.autoscale(tight=True)
-		
+		if (self.whatoplot == "svsf"):
+			self.axes.set_aspect(1.0)
+			self.axes.autoscale(tight=True)
+		else:
+			self.axes.set_aspect('auto')
+			self.axes.autoscale(tight=False)
+			
 		# Legend
 		self.axes.legend([g1, g2], ['Measured', 'Predicted'],
 			loc = 'upper right', ncol = 2, scatterpoints = 1,
@@ -150,29 +203,66 @@ class plotGrainData(PyQt5.QtWidgets.QMainWindow):
 			borderpad = 0.2, labelspacing = 0.2, bbox_to_anchor=(1., 1.05))
 		
 		# Ready to draw
+		self.annotation = "" # No annotation yet. Important for dealing with picking events
 		self.canvas.draw()
 
-	def on_key_press(self, event):
-		print('you pressed', event.key)
-		# implement the default mpl key press events described at
-		# http://matplotlib.org/users/navigation_toolbar.html#navigation-keyboard-shortcuts
-		key_press_handler(event, self.canvas, self.mpl_toolbar)
+	"""
+	Event processing to change the plot type
+	"""
+	def plotselectionchange(self,index):
+		self.whatoplot = self.plotWhatBox.itemData(index)
+		self.on_draw()
+
+	"""
+	Event processing: we need to change grain based on text input
+	"""
+	def new_grain(self):
+		try:
+			i = int(self.grainNBox.text())-1
+			self.graintoplot = (i) % self.ngrains
+			self.grainNBox.setText("%d" % (self.graintoplot+1))
+			self.on_draw()
+		except ValueError:
+			PyQt5.QtWidgets.QMessageBox.critical(self, "Error", "Not an integer")
 
 
+	"""
+	Event processing when left arrow is click (move to previous grain)
+	"""
+	def handle_backward(self,evt):
+		self.graintoplot = (self.graintoplot-1) % self.ngrains
+		self.grainNBox.setText("%d" % (self.graintoplot+1))
+		self.on_draw()
+
+	"""
+	Event processing when right arrow is click (move to next grain)
+	"""
+	def handle_forward(self,evt):
+		self.graintoplot = (self.graintoplot+1) % self.ngrains
+		self.grainNBox.setText("%d" % (self.graintoplot+1))
+		self.on_draw()
+
+	"""
+	Picking events on data in plot
+	- Locates the peak that is being selected
+	- Pulls out indexing information for this peak (h, k, l, predicted and measured angles)
+	- Displays information in the plot, next to the peak
+	
+	Parameters
+		event
+	"""
 	def on_pick(self, event):
 		# print('you picked on data')
 		thisdataset = event.artist
 		index = event.ind
 		posX = (thisdataset.get_offsets())[index][0][0]
 		posY = (thisdataset.get_offsets())[index][0][1]
-		text = self.grainsData.getPeakInfo(index[0])
+		text = self.grainsData.getPeakInfo(self.graintoplot, index[0])
 		if (self.annotation != ""):
 			self.annotation.remove()
 		# Add the peak information to the plot
 		self.annotation = self.axes.text(posX, posY, text, fontsize=9, bbox=dict(boxstyle="round", ec=(1., 0.5, 0.5), fc=(1., 1., 1.), alpha=0.9))
 		self.canvas.draw()
-		
-
 
 #################################################################
 #
@@ -204,8 +294,7 @@ def main(argv):
 	parser.add_argument('FLT',  help="FLT file used to generate g-vectors for indexing (required)")
 	
 	# Other arguments
-	parser.add_argument('-p', '--plot', type=int, choices=range(1, 4), required=False, help="""What do you want to plot ?
-    1 for s vs f in pixels (i.e. diffraction image), 2 for eta vs. 2 theta, 3 for omega vs. 2 theta. Default is 1.""", default=1)
+	parser.add_argument('-p', '--plot', required=False, help="""What do you want to plot ? "svsf" for s vs f in pixels (i.e. diffraction image), etavs2theta for eta vs. 2 theta, omegavsttheta for omega vs. 2 theta. Default is svsf.""", default="svsf")
 	parser.add_argument('-g', '--grain', type=int, required=False, help="""Grain number. Default is 1.""", default=1)
 
 	args = vars(parser.parse_args())
@@ -216,19 +305,11 @@ def main(argv):
 	p = args['plot']
 	g = args['grain']
 	
-	
 	grainCompare = testGrainsPeaks.grainPlotData()
-	
 	test = grainCompare.parseInputFiles(gsfile, FLT, par)
-	if (p==2):
-		grainCompare.setPlotType("etavsttheta")
-	elif (p==3):
-		grainCompare.setPlotType("omegavsttheta")
-	
-	grainCompare.selectGrain(g)
-	
-	app = PyQt5.QtWidgets.QApplication(sys.argv)
-	form = plotGrainData(grainCompare)
+	app = PyQt5.QtWidgets.QApplication(sys.argv)	
+	form = plotGrainData(grainCompare,g,p)
+
 	app.exec_()
 
 
