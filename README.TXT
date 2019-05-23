@@ -20,7 +20,7 @@ Installation instructions
 To use the TIMEleSS tools, try this:
 
 1- Download and install python
-2- Add the packages numpy, scipy, matplotlib
+2- Add the packages numpy, scipy, matplotlib, and pyqt5
 3- Add the xfab package from the FABLE-3DXRD project at https://github.com/FABLE-3DXRD 
 4- Then try: python setup.py build
 5- Followed by: python setup.py install
