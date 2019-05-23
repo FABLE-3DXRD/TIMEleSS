@@ -46,13 +46,11 @@ if platform.system() == 'Linux':
 	matplotlib.use('GTK3Agg')
 import matplotlib.pyplot as plt
 
+
+
 # Access to the toolbar buttons in MathPlotLib
 from matplotlib.backend_bases import NavigationToolbar2, Event
 
-# Dialog to configure plot
-import Tkinter
-import tkSimpleDialog
-from PyQt4.QtGui import (QLineEdit, QPushButton, QApplication, QVBoxLayout, QDialog)
 
 # Various matplotlib tricks to adapt the GUI to what we want
 #
@@ -322,14 +320,16 @@ class grainPlotData:
 	"""
 	def handle_backward(self,evt):
 		self.graintoplot = (self.graintoplot-1) % self.ngrains
-		self.plotGrainData()
+		plotdata = self.getPlotData()
+		self.makeThePlot(*plotdata)
 
 	"""
 	Event processing when right arrow is click (move to next grain)
 	"""
 	def handle_forward(self,evt):
 		self.graintoplot = (self.graintoplot+1) % self.ngrains
-		self.plotGrainData()
+		plotdata = self.getPlotData()
+		self.makeThePlot(*plotdata)
 
 	"""
 	Picking events on data in plot
@@ -367,6 +367,23 @@ class grainPlotData:
 		self.fig.canvas.draw()
 	
 	# TODO: use the configure button to allow changing what is plotted (could be s vs omega, for instance)
+	
+	def getPeakInfo(self, peaknum):
+		
+		grain = self.grains[self.graintoplot]
+		peaks = grain.getPeaks()
+		peak = peaks[peaknum]
+		tthetaPred = peak.getTThetaPred()
+		etaPred = peak.getEtaPred()
+		omegaPred = peak.getOmegaPred()
+		tthetaMeas = peak.getTThetaMeasured()
+		etaMeas = peak.getEtaMeasured()
+		omegaMeas = peak.getOmegaMeasured()
+		hkl = peak.getHKL()
+		# Preparing text
+		text = "Peak (%d,%d,%d)\nttheta = (%.1f, %.1f, %.1f)\neta = (%.1f, %.1f, %.1f)\nomega = (%.1f, %.1f, %.1f)\n(pred., meas., diff.)" % (hkl[0], hkl[1], hkl[2], tthetaPred, tthetaMeas, tthetaPred-tthetaMeas, etaPred, etaMeas, etaPred-etaMeas, omegaPred, omegaMeas, omegaPred - omegaMeas)
+		
+		return text
 
 
 #################################################################
@@ -420,7 +437,7 @@ def main(argv):
 		plotWindow.setPlotType("omegavsttheta")
 	plotWindow.selectGrain(g)
 	plotdata = plotWindow.getPlotData()
-	plotWindow.makeThePlot(plotdata)
+	plotWindow.makeThePlot(*plotdata)
 	
 	
 	# Create the Qt Application (we need to embed the plot inside an application to fire dialogs)
