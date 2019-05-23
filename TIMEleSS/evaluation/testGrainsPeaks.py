@@ -43,7 +43,7 @@ from ImageD11 import parameters
 import matplotlib
 import platform
 if platform.system() == 'Linux':
-	matplotlib.use('GTK3Agg')
+	matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 
 
