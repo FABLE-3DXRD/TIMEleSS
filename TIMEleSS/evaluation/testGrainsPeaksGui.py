@@ -37,12 +37,13 @@ import numpy
 
 # Plotting routines
 import matplotlib
-import matplotlib.pyplot
+matplotlib.use("Qt5Agg")
+
 from matplotlib.figure import Figure
 
 from matplotlib.backend_bases import key_press_handler, Event
 
-from matplotlib.backends.backend_qt4agg import (
+from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
@@ -52,9 +53,12 @@ from matplotlib.backend_bases import NavigationToolbar2
 
 
 # PyQT graphical interface
-# from PyQt5.QtGui import (QLineEdit, QPushButton, QApplication, QVBoxLayout, QDialog)
-import PyQt4.QtGui
-import PyQt4.QtCore
+# import PyQt4.QtGui
+
+import PyQt5.QtWidgets # import (QLineEdit, QPushButton, QApplication, QVBoxLayout, QDialog)
+# import PyQt5.QtWidgets
+# import PyQt5.QtCore
+
 
 NavigationToolbar2.toolitems = (
 	('Home', 'Reset original view', 'home', 'home'), 
@@ -68,15 +72,15 @@ NavigationToolbar2.toolitems = (
 	(None, None, None, None), 
 	('Save', 'Save the figure', 'filesave', 'save_figure'))
 
-class configurePlotDialog(PyQt4.QtGui.QDialog):
+class configurePlotDialog(PyQt5.QtWidgets.QDialog):
 
 	def __init__(self, parent=None):
 		super(configurePlotDialog, self).__init__(parent)
 		# Create widgets
-		self.edit = PyQt4.QtGui.QLineEdit("Write my name here")
-		self.button = PyQt4.QtGui.QPushButton("Show Greetings")
+		self.edit = PyQt5.QtWidgets.QLineEdit("Write my name here")
+		self.button = PyQt5.QtWidgets.QPushButton("Show Greetings")
 		# Create layout and add widgets
-		layout = PyQt4.QtGui.QVBoxLayout()
+		layout = PyQt5.QtWidgets.QVBoxLayout()
 		layout.addWidget(self.edit)
 		layout.addWidget(self.button)
 		# Set dialog layout
@@ -89,10 +93,10 @@ class configurePlotDialog(PyQt4.QtGui.QDialog):
 		print ("Hello %s" % self.edit.text())
 
 
-class plotGrainData(PyQt4.QtGui.QMainWindow):
+class plotGrainData(PyQt5.QtWidgets.QMainWindow):
 	
 	def __init__(self, grainsData, parent=None):
-		PyQt4.QtGui.QMainWindow.__init__(self, parent)
+		PyQt5.QtWidgets.QMainWindow.__init__(self, parent)
 		self.annotation = ""
 		self.grainsData = grainsData
 		self.create_main_frame()
@@ -100,11 +104,11 @@ class plotGrainData(PyQt4.QtGui.QMainWindow):
 		self.show()
 
 	def create_main_frame(self):
-		self.main_frame = PyQt4.QtGui.QWidget()
+		self.main_frame = PyQt5.QtWidgets.QWidget()
 		self.fig = Figure((8.0, 8.0), dpi=100,tight_layout=True,edgecolor='w',facecolor='w')
 		self.canvas = FigureCanvas(self.fig)
 		self.canvas.setParent(self.main_frame)
-		self.canvas.setFocusPolicy(PyQt4.QtCore.Qt.StrongFocus)
+		self.canvas.setFocusPolicy(PyQt5.QtCore.Qt.StrongFocus)
 		self.canvas.setFocus()
 
 		self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
@@ -112,7 +116,7 @@ class plotGrainData(PyQt4.QtGui.QMainWindow):
 		self.canvas.mpl_connect('key_press_event', self.on_key_press)
 		self.canvas.mpl_connect('pick_event', self.on_pick) 
 
-		vbox = PyQt4.QtGui.QVBoxLayout()
+		vbox = PyQt5.QtWidgets.QVBoxLayout()
 		vbox.addWidget(self.canvas)  # the matplotlib canvas
 		vbox.addWidget(self.mpl_toolbar)
 		self.main_frame.setLayout(vbox)
@@ -156,14 +160,11 @@ class plotGrainData(PyQt4.QtGui.QMainWindow):
 
 
 	def on_pick(self, event):
-		print('you picked on data')
-		
+		# print('you picked on data')
 		thisdataset = event.artist
 		index = event.ind
-		
 		posX = (thisdataset.get_offsets())[index][0][0]
 		posY = (thisdataset.get_offsets())[index][0][1]
-		
 		text = self.grainsData.getPeakInfo(index[0])
 		if (self.annotation != ""):
 			self.annotation.remove()
@@ -226,7 +227,7 @@ def main(argv):
 	
 	grainCompare.selectGrain(g)
 	
-	app = PyQt4.QtGui.QApplication(sys.argv)
+	app = PyQt5.QtWidgets.QApplication(sys.argv)
 	form = plotGrainData(grainCompare)
 	app.exec_()
 
