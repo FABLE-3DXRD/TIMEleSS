@@ -33,6 +33,7 @@ from distutils import util
 pathMySubPackage1 = util.convert_path('TIMEleSS/general')
 pathMySubPackage2 = util.convert_path('TIMEleSS/simulation')
 pathMySubPackage3 = util.convert_path('TIMEleSS/diffraction')
+pathMySubPackage4 = util.convert_path('TIMEleSS/evaluation')
     
 setup(
 	name='TIMEleSS',
@@ -54,9 +55,9 @@ setup(
 				'TIMEleSS.general': pathMySubPackage1,
 				'TIMEleSS.simulation': pathMySubPackage2,
 				'TIMEleSS.diffraction': pathMySubPackage3,
+				'TIMEleSS.evaluation': pathMySubPackage4,
                 'TIMEleSS.data': util.convert_path('TIMEleSS/data')},
-	packages=['TIMEleSS', 'TIMEleSS.general', 'TIMEleSS.simulation', 'TIMEleSS.diffraction'],
-	
+	packages=['TIMEleSS', 'TIMEleSS.general', 'TIMEleSS.simulation', 'TIMEleSS.diffraction', 'TIMEleSS.evaluation'],
 	
 	package_data = {'TIMEleSS': ['TIMEleSS/data/*.*']},
 	include_package_data=True,
@@ -79,9 +80,9 @@ setup(
 			'timelessClearGVEGrains = TIMEleSS.simulation.clearGVEGrains:run',
 			'timelessClearFLTGrains = TIMEleSS.simulation.clearFLTGrains:run',
 			'timelessSaveFLTGrains = TIMEleSS.simulation.fltForGrains:run',
-        ]
-		#'gui_scripts': [
-		#    'baz = my_package_gui:start_func',
-		#]
+        ],
+		'gui_scripts': [
+		    'timelessPlotIndexedGrain = TIMEleSS.evaluation.testGrainsPeaksGui:run',
+		]
 	}
 )
