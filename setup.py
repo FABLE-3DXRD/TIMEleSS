@@ -80,6 +80,7 @@ setup(
 			'timelessClearGVEGrains = TIMEleSS.simulation.clearGVEGrains:run',
 			'timelessClearFLTGrains = TIMEleSS.simulation.clearFLTGrains:run',
 			'timelessSaveFLTGrains = TIMEleSS.simulation.fltForGrains:run',
+			'timelessExtractEulerAngles = TIMEleSS.evaluation.extractEulerAngles:run',
         ],
 		'gui_scripts': [
 		    'timelessPlotIndexedGrain = TIMEleSS.evaluation.testGrainsPeaksGui:run',
