@@ -77,7 +77,7 @@ def meanFileSeries(stem,first,last,digits,ext,new,tif):
 		# Open the EDF image file
 		imedf = fabio.open(ifile)
 		# get data and use it as a starting point
-		data += numpy.copy(imedf.data)
+		data += numpy.copy(imedf.data).astype('int64')
 	# calculating mean
 	data = data / (last-first+1)
 	# Preparing a header
