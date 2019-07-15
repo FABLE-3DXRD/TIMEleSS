@@ -230,6 +230,7 @@ q0 qx qy qz
 	output.write(text)
 	output.write("\n")
 	i = 0
+	totalgve = 0
 	for grain in grains:
 		i += 1
 		text = (grain.getGrainSpotterTxt())[:] # we make a copy of the array, this is important
@@ -239,6 +240,11 @@ q0 qx qy qz
 		for line in text:
 			output.write(line)
 			output.write("\n")
+		totalgve += grain.getNPeaks()
+	textsummary = """In total %d gvectors of which %d (%d%%) were assigned:
+%d (%d%%) was not assigned, something once, something more than once.""" % (len(grains), totalgve, totalgve/len(grains)*100, len(grains)-totalgve, 100-totalgve/len(grains)*100) #FIXME The words "something" have to be changed. The term "grains" is still wrong (must be G-vectors instead).
+	output.write(textsummary)
+	output.write("\n")
 	output.close()
 
 
