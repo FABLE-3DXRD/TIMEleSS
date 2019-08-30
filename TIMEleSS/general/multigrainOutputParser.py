@@ -52,6 +52,7 @@ General parser for grain files, based on file extensions.
 
 If extension is .log, will parse for GrainSpotter log files
 If extension is .gff, will parse for gff file
+If extension is .ubi, will parse for ubi file
 
 Returns 
 	A list of grains
