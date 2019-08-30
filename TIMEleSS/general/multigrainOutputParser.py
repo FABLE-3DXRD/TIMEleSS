@@ -42,6 +42,9 @@ import os
 from TIMEleSS.general import grain3DXRD
 from TIMEleSS.general import indexedPeak3DXRD
 
+# Import indexing from ImageD11, has stuff to go from UBi to U, etc
+import ImageD11.indexing
+
 ############################################################################################# 
 
 """
@@ -63,6 +66,8 @@ def parseGrains(filename):
 		return parse_gff(filename)
 	elif (file_extension == ".log"):
 		return parse_GrainSpotter_log(filename)
+	elif (file_extension == ".ubi"):
+		return parse_ubi(filename)
 	else:
 		print ("Error parsing %s. I do not know this file extension. Should be .log or .gff" % filename)
 	return []
@@ -302,6 +307,61 @@ def parse_gff(gfffile):
 		# Reading and storing peak information
 		grainList.append(grain)
 
+	return grainList
+
+
+#############################################################################################     
+
+
+"""
+Parser for UBI files
+
+Returns 
+	A list of grains
+
+Parameters
+	logfile: name and path to the UBI file
+"""
+def parse_ubi(ubifile):
+
+
+	# Read ubi file
+	g = open(ubifile, 'r')
+	# reads all the lines and saves it to the array "content"
+	ubicontent = [line.strip() for line in g.readlines()]
+	g.close()
+	# Count lines with data
+	ndata = 0
+	for line in ubicontent:
+		if (line != ""):
+			ndata += 1
+	ngrains = ndata/3
+	
+	# Parsing data for each grain and putting them in a f list
+	grainList = []
+
+	for j in range(0,ngrains):
+		grainNum = j+1
+		grain = grain3DXRD.Grain()
+		grain.setFileName(ubifile)
+		grain.setFileIndex(grainNum)
+		linestart = j*4
+		UBI = scipy.empty([3,3])
+		for k in range(0,3):
+			linecontent = ubicontent[linestart+k].split()
+			UBI[k,0] = float(linecontent[0])
+			UBI[k,1] = float(linecontent[1])
+			UBI[k,2] = float(linecontent[2])
+		# Extracting U from UBi
+		U = ImageD11.indexing.ubitoU(UBI)
+		# Extracting B
+		B =scipy.linalg.inv( scipy.dot(UBI,U))
+		# Setting information
+		grain.setUBBi(U,B,UBI)
+		# extracting the Euler angles phi1 phi phi2
+		grain.setEulerAnglesFromU()
+		# Done, we add the grain
+		grainList.append(grain)
 	return grainList
 
 #############################################################################################
