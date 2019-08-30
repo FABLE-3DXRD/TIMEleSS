@@ -429,8 +429,8 @@ def main(argv):
 	
 	parser = argparse.ArgumentParser(usage='%(prog)s [options] file1 file2', description="Compare grains between 2 files\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
-	parser.add_argument('file1', help="first grain file, used as a reference (gff or GrainSpotter output file, based on extension)")
-	parser.add_argument('file2', help="second grain file, matched against the previous file (gff or GrainSpotter output file, based on extension)")
+	parser.add_argument('file1', help="first grain file, used as a reference (gff, ubi, or GrainSpotter output file, based on extension)")
+	parser.add_argument('file2', help="second grain file, matched against the previous file (gff, ubi, or GrainSpotter output file, based on extension)")
 	
 	parser.add_argument('-c', '--crystal_system', type=int, choices=range(1, 8), required=True, help="""Crystal system. Can be one of the following 
     1: Triclinic
