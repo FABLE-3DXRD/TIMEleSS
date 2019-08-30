@@ -112,3 +112,10 @@ class Grain:
 		phi1 = math.degrees(phi1Rad)
 		phi2 = math.degrees(phi2Rad)
 		return [phi1, phi, phi2]
+	
+	def setEulerAnglesFromU(self):
+		eulers = self.EulerAnglesFromU()
+		self.phi1 = eulers[0]
+		self.Phi = eulers[1]
+		self.phi2 = eulers[2]
+		
