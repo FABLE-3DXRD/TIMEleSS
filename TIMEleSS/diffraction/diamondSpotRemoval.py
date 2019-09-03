@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from __future__ import print_function # To make print statements compatible with python3
 
 """
 This is part of the TIMEleSS tools
@@ -81,10 +81,10 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
     imagename = os.path.join(edfimagepath, medianename)
     medianeIm = fabio.edfimage.edfimage()
     medianeIm.read(imagename)
-    print "Dimensions of median image: ", medianeIm.getDims()
+    print("Dimensions of median image: ", medianeIm.getDims())
     medianeData = medianeIm.getData().astype('float32')
-    print "Dimensions of median image: ", medianeIm.getDims()
-    print "Median info: ", medianeData.min(),  medianeData.max(), medianeData.mean()
+    print("Dimensions of median image: ", medianeIm.getDims())
+    print("Median info: ", medianeData.min(),  medianeData.max(), medianeData.mean())
     
     # Loop on images and test median substraction
     for i in range(first,last+1):
@@ -92,13 +92,13 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
         format = "%s%0" + str(ndigits) + "d." + extension
         image = format % (stem,i)
         imagename = os.path.join(edfimagepath, image)
-        print "Reading " + imagename
+        print("Reading " + imagename)
         im = fabio.edfimage.edfimage()
         im.read(imagename)
-        print "Dimensions: ", im.getDims()
+        print("Dimensions: ", im.getDims())
         data = im.getData().astype('float32')
-        print "Image info (min, max, mean): ", data.min(),  data.max(), data.mean()
-        print "Substraction median..."
+        print("Image info (min, max, mean): ", data.min(),  data.max(), data.mean())
+        print("Substraction median...")
         # Removing median image
         data = data-medianeData
         # Removing anything below 0
@@ -110,7 +110,7 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
         # Better to work on low resolution, removed a lot of false positives
         # Nearest interpolation is important to keep the spots and avoid oversmoothing the image
         # http://matplotlib.sourceforge.net/users/image_tutorial.html
-        print "Rescaling to %dx%d..." % (scale,scale)
+        print("Rescaling to %dx%d..." % (scale,scale))
         datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
         max = datascale.max()
         datascale = datascale*oldmax/max
@@ -118,7 +118,7 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
         mindata = datascale.min()
         maxdata = datascale.max()
         # Applying a median filter for removal of smaller spots
-        print "Applying %d pixels median filter to removed smalled spots..." % (filtersize)
+        print("Applying %d pixels median filter to removed smalled spots..." % (filtersize))
         datascale2 = scipy.ndimage.filters.median_filter(datascale,size=filtersize)
         max = datascale2.max()
         if (max > 0):
@@ -138,8 +138,8 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
             p.set_data(datascale)
             plt.clim(mindata, threshold*meandata)
             plt.pause(0.5)
-        # print "Image info median filter: ", min,  max, mean
-        print "Thresholding above %.1f times the mean..." % (threshold)
+        # print("Image info median filter: ", min,  max, mean)
+        print("Thresholding above %.1f times the mean..." % (threshold))
         mask = (datascale2 > threshold*mean).astype(numpy.int8)
         # Plot mask
         plt.title(image + " filtered and thresholded")
@@ -171,7 +171,7 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
     """
         
     # Read median image
-    print "Loading median image"
+    print("Loading median image")
     imagename = os.path.join(edfimagepath, medianename)
     medianeIm = fabio.edfimage.edfimage()
     medianeIm.read(imagename)
@@ -180,9 +180,9 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
     ysize = medianeIm.getDim2()
     
     # Allocate space for mask
-    print "Allocating memory for mask"
+    print("Allocating memory for mask")
     mask = numpy.empty([last-first+1,scale,scale],dtype=numpy.int8)
-    print "Mask will be %.2f Mb" % (mask.size*mask.itemsize/1048576.)
+    print("Mask will be %.2f Mb" % (mask.size*mask.itemsize/1048576.))
     
     # Loop on images and test median substraction
     for i in range(first,last+1):
@@ -190,7 +190,7 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
         format = "%s%0" + str(ndigits) + "d." + extension
         image = format % (stem,i)
         imagename = os.path.join(edfimagepath, image)
-        print "Reading " + imagename + " and creating corresponding mask"
+        print("Reading " + imagename + " and creating corresponding mask")
         im = fabio.edfimage.edfimage()
         im.read(imagename)
         data = im.getData().astype('float32')
@@ -220,25 +220,25 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
         else:
             mean = 0
         # Creating mask with threshold
-        # print "threshold: ", threshold
+        # print("threshold: ", threshold)
         thismask = (datascale2 > threshold*mean).astype(numpy.int8)
         # Growing mask in X and Y
-        print "Growing  mask by " + str(growXY) + " pixels in X and Y"
+        print("Growing  mask by " + str(growXY) + " pixels in X and Y")
         thismask = scipy.ndimage.morphology.binary_dilation(thismask,iterations=growXY)
         mask[i-first::] = thismask
     # Smoothing (removed, it was not helping and removing real spots
-    #print "Smoothing global mask"
+    #print("Smoothing global mask")
     # Remove small white regions
     #mask = scipy.ndimage.binary_opening(mask)
     # Remove small black hole
     #mask = scipy.ndimage.binary_closing(mask)
     # Growing mask around the values we found
     # See http://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.morphology.binary_dilation.html
-    print "Growing  global mask by " + str(growXYO) + " pixels in X, Y, and omega"
+    print("Growing  global mask by " + str(growXYO) + " pixels in X, Y, and omega")
     mask = scipy.ndimage.morphology.binary_dilation(mask,iterations=growXYO)
     # Clearing central disk
     if (radius != None):
-        print "Removing portion of mask within the central radius"
+        print("Removing portion of mask within the central radius")
         c_rawy = c_rawy*scale/xsize
         c_rawz = c_rawz*scale/ysize
         radius = radius*scale/xsize
@@ -252,7 +252,7 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
             thismask = mask[i-first]   
             thismask = numpy.multiply(thismask,maskonmask)
             mask[i-first] = thismask
-    print "Mask is ready"
+    print("Mask is ready")
     return mask
  
 
@@ -270,14 +270,14 @@ def plotMask(edfimagepath, stem, first, last, mask, ndigits=4, extension='edf'):
     ndigits: Number of digits for EDF file numbering.
     extension: EDF file extension.
     """
-    print "Preparing to test mask"  
+    print("Preparing to test mask"  )
     # Loop on images and plot corresponding mask
     for i in range(first,last+1):
         # Read image data
         format = "%s%0" + str(ndigits) + "d." + extension
         image = format % (stem,i)
         imagename = os.path.join(edfimagepath, image)
-        print "Reading " + imagename + " and showing corresponding mask"
+        print("Reading " + imagename + " and showing corresponding mask")
         im = fabio.edfimage.edfimage()
         im.read(imagename)
         data = im.getData().astype('float32')
@@ -313,7 +313,7 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
     ndigits: Number of digits for EDF file numbering.
     extension: EDF file extension.
     """
-    print "Loading median data"
+    print("Loading median data")
     # Read median image
     imagename = os.path.join(edfimagepath, medianename)
     medianeIm = fabio.edfimage.edfimage()
@@ -326,7 +326,7 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
         format = "%s%0" + str(ndigits) + "d." + extension
         image = format % (stem,i)
         imagename = os.path.join(edfimagepath, image)
-        print "Reading " + imagename + ", substracting median, and clearing data below mask"
+        print("Reading " + imagename + ", substracting median, and clearing data below mask")
         im = fabio.edfimage.edfimage()
         im.read(imagename)
         data = im.getData().astype('float32')
@@ -374,12 +374,12 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
     extension: EDF file extension.
     """
     if ((not (os.path.isdir(newpath))) or (not (os.path.exists(newpath)))) :
-        print "ERROR! %s is not a directory or does not exist.\nAborting." % newpath
+        print("ERROR! %s is not a directory or does not exist.\nAborting." % newpath)
         return
     if (os.path.samefile(edfimagepath, newpath)):
-        print "ERROR!\nImages are read from %s.\nNew EDF should be saved in %s.\nThis will destroy the original data.\nAborting" % (edfimagepath, newpath)
+        print("ERROR!\nImages are read from %s.\nNew EDF should be saved in %s.\nThis will destroy the original data.\nAborting" % (edfimagepath, newpath))
         return
-    print "Reading median image"
+    print("Reading median image")
     # Read median image
     imagename = os.path.join(edfimagepath, medianename)
     medianeIm = fabio.edfimage.edfimage()
@@ -392,7 +392,7 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
         format = "%s%0" + str(ndigits) + "d." + extension
         image = format % (stem,i)
         imagename = os.path.join(edfimagepath, image)
-        print "Reading and processing " + imagename
+        print("Reading and processing " + imagename)
         im = fabio.edfimage.edfimage()
         im.read(imagename)
         data = im.getData().astype('float32')
@@ -418,7 +418,7 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
         data[idx]=median
         # Save new data
         newname = os.path.join(newpath, image)
-        print "Saving new EDF with median and mask removed in " + newname
+        print("Saving new EDF with median and mask removed in " + newname)
         im = fabio.edfimage.edfimage()
         im.read(imagename)
         im.setData(data.astype('uint32'))
@@ -444,8 +444,8 @@ def main(argv):
 	"""
 	Main subroutine
 	"""
-	print "Diamond spot removal for 3D-XRD in the DAC"
-	print "This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n"
+	print("Diamond spot removal for 3D-XRD in the DAC")
+	print("This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	usage = "usage: %(prog)s [options] todo"
 	desc="""
@@ -522,7 +522,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n
 	error = False
 	if (radius != None):
 		if ((c_rawy == None) or (c_rawz == None)):
-			print "ERROR: beam center position need if you want to define a radius"
+			print("ERROR: beam center position need if you want to define a radius")
 			error = True
 	
 	if (error):
@@ -540,19 +540,19 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n
 		testClearMask(edfimagepath, stem, first, last, median, mask, ndigits=ndigits, extension=extension)
 	elif (todo == 'save'):
 		if (newpath == None):
-			print "ERROR: No new path to save data!"
+			print("ERROR: No new path to save data!")
 			parser.error("try option -h for help\n")
 			sys.exit(2)
 		if ((not (os.path.isdir(newpath))) or (not (os.path.exists(newpath)))) :
-			print "ERROR! %s is not a directory or does not exist.\nAborting." % newpath
+			print("ERROR! %s is not a directory or does not exist.\nAborting." % newpath)
 			sys.exit(2)
 		if (os.path.samefile(edfimagepath, newpath)):
-			print "ERROR!\nImages are read from %s.\nNew EDF should be saved in %s.\nThis will destroy the original data.\nAborting" % (edfimagepath, newpath)
+			print("ERROR!\nImages are read from %s.\nNew EDF should be saved in %s.\nThis will destroy the original data.\nAborting" % (edfimagepath, newpath))
 			sys.exit(2)
 		mask = createMask(edfimagepath, stem, first, last, median, ndigits=ndigits, extension=extension, scale=scale, filtersize=filtersize, threshold=threshold, growXY=growXY, growXYO=growXYO, c_rawy=c_rawy, c_rawz=c_rawz, radius=radius)
 		saveDataClearMask(edfimagepath, newpath, stem, first, last, median, mask, ndigits=ndigits, extension=extension)
 	else:
-		print "Not sure what to do. Try " + sys.argv[0] + " --help\n"
+		print("Not sure what to do. Try " + sys.argv[0] + " --help\n")
 
 
 ##########################################################################################################
