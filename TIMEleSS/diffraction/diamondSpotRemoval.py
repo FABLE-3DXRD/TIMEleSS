@@ -48,6 +48,9 @@ import scipy.ndimage
 import scipy.ndimage.filters
 import scipy.ndimage.morphology
 
+# Inpaint into a mask
+import inpaint
+
 # Fabio, from ESRF fable package
 import fabio
 import fabio.edfimage
@@ -359,7 +362,7 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
 
 ##########################################################################################################
 
-def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mask, ndigits=4, extension='edf'):
+def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mask, ndigits=4, extension='edf', doinpaint=False):
     """
     Save new EDF files with the median and mask removed
     
@@ -372,6 +375,7 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
     mask: mask data
     ndigits: Number of digits for EDF file numbering.
     extension: EDF file extension.
+    doinpaint: if set to true, fills diamond mask with inpainting. If not set, diamond mask is filled with median value
     """
     if ((not (os.path.isdir(newpath))) or (not (os.path.exists(newpath)))) :
         print("ERROR! %s is not a directory or does not exist.\nAborting." % newpath)
@@ -385,6 +389,11 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
     medianeIm = fabio.edfimage.edfimage()
     medianeIm.read(imagename)
     medianeData = medianeIm.getData().astype('float32')
+    
+    if (doinpaint):
+        print ("Filling mask with inpainting")
+    else:
+        print ("Filling mask with median value")
     
     # Loop on images and test median substraction
     for i in range(first,last+1):
@@ -401,21 +410,36 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
         data = data-medianeData
         # Removing anything below 0
         data = data.clip(min=0)
-        mean = data.mean()
-        median = numpy.median(data)
-        max = data.max()
-        min = data.min()
+        meanI = data.mean()
+        medianI = numpy.median(data)
+        maxI = data.max()
+        minI = data.min()
         xsize = im.getDim1()
         ysize = im.getDim2()
         # Preparing mask
         thismask = mask[i-first]
         thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
-        maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+        maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest',mode='F')
         # Creating data under mask using linear interpolation or inpainting
         # Need to create a list of points for which we have data
         # Actually, gave up, fill with median value!
         idx=(maskscaled>0)
-        data[idx]=median
+        if (doinpaint):
+            # Creating data under mask using inpainting
+            # We rescale the image and inpaint on a smaller version. Before reducing, remove extreme intensity values (it works better)
+            datacopy = data.copy()
+            datacopy = datacopy.clip(0., 10.*meanI)
+            datareduced = scipy.misc.imresize(datacopy,(thismask.shape[0],thismask.shape[1]),interp='nearest',mode='F')
+            # Setting mask data as NaN and call for inpainting. Parameters have been set from trial and error
+            idx2=(thismask>0)
+            datareduced[idx2] = numpy.NaN
+            result0 = inpaint.replace_nans(datareduced, max_iter=20, tol=1., kernel_radius=2, kernel_sigma=5, method='idw')
+            # Rescaling inpainted image and set new values at mask positions
+            result0 = scipy.misc.imresize(result0,(xsize,ysize),interp='nearest',mode='F')
+            data[idx] = result0[idx]
+        else:
+            # Fill maslwith median value!
+            data[idx]=medianI
         # Save new data
         newname = os.path.join(newpath, image)
         print("Saving new EDF with median and mask removed in " + newname)
@@ -493,6 +517,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n
 	parser.add_argument('--c_rawy', required=False, type=int, help="Raw Y position of beam center (can be read directly in Fabian, plot your image with orientation 1 0 0 1, it is the first number displayed to locate the cursor). Used to ignore a disk at the center of the image. If you have large intensity spots which are not diamond in there.", default=None)
 	parser.add_argument('--c_rawz', required=False, type=int, help="Raw Z position of beam center (can be read directly in Fabian, plot your image with orientation 1 0 0 1, it is the first number displayed to locate the cursor). Used to ignore a disk at the center of the image. If you have large intensity spots which are not diamond in there.", default=None)
 	parser.add_argument('--radius', required=False, type=int, help="Radius of disk to ignore around the beam center (in pixels, optional). c_rawy and c_rawz are mendatory if you want to use this option. . Used to ignore a disk at the center of the image. If you have large intensity spots which are not diamond in there.", default=None)
+	parser.add_argument('--inpaint', required=False, type=bool, help="If set to True, fill diamond mask with inpainting. If not set, diamond mask is filled with median value.", default=False)
 	
 	args = vars(parser.parse_args())
 	
@@ -517,6 +542,8 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n
 	c_rawy = args['c_rawy']
 	c_rawz = args['c_rawz']
 	radius = args['radius']
+	
+	inpaint = args['inpaint']
 
 
 	error = False
@@ -550,7 +577,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n
 			print("ERROR!\nImages are read from %s.\nNew EDF should be saved in %s.\nThis will destroy the original data.\nAborting" % (edfimagepath, newpath))
 			sys.exit(2)
 		mask = createMask(edfimagepath, stem, first, last, median, ndigits=ndigits, extension=extension, scale=scale, filtersize=filtersize, threshold=threshold, growXY=growXY, growXYO=growXYO, c_rawy=c_rawy, c_rawz=c_rawz, radius=radius)
-		saveDataClearMask(edfimagepath, newpath, stem, first, last, median, mask, ndigits=ndigits, extension=extension)
+		saveDataClearMask(edfimagepath, newpath, stem, first, last, median, mask, ndigits=ndigits, extension=extension, doinpaint=inpaint)
 	else:
 		print("Not sure what to do. Try " + sys.argv[0] + " --help\n")
 
