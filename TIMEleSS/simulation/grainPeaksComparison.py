@@ -327,6 +327,9 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 	grains2clean = removeDoubleGrains(grains2, crystal_system, cutoff, logfile)
 	logit(logfile, "")
 	
+	# Will hold grains that match a peak
+	peaksInGrains = {}
+	
 	# Loop in unique grains in list 1, trying to grains in list 2 that share the same peaks
 	for i in range(0,len(grains1clean)):
 		grain1 = grains1clean[i]
@@ -338,6 +341,21 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem):
 			if (len(matches)>0):
 				logit(logfile, "- Grain %s of %s shares %d peaks with %s of %s" % (grain1.getName(), file1, len(matches), grain2.getName(), file2))
 				logit(logfile, "Matching peaks (GVE ID): " + str(list(matches)))
+				for peak in matches:
+					try:
+						grains = peaksInGrains[peak]
+						grains.append(grain1.getName() + " in " + file1)
+						grains.append(grain2.getName() + " in " + file2)
+						peaksInGrains[peak] = grains
+					except KeyError:
+						# Key is not present
+						peaksInGrains[peak] = [grain1.getName() + " in " + file1, grain2.getName() + " in " + file2]
+	
+	
+	logit(logfile, "\nPeaks information\n")
+	for peak in peaksInGrains:
+		logit(logfile, "- peak %s is seen in %d grains: " % (peak, len(peaksInGrains[peak])) + str(peaksInGrains[peak]))
+
 	return
 
 
