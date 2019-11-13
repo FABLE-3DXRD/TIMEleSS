@@ -97,6 +97,12 @@ class Grain:
 	def getPeaks(self):
 		return self.peaks
 	
+	def getPeaksGVEID(self):
+		peaklist = []
+		for peak in self.peaks:
+			peaklist.append(peak.getGVEID())
+		return peaklist
+	
 	def setGrainSpotterTxt(self,txt):
 		self.grainSpotterTxt = txt
 	def getGrainSpotterTxt(self):
