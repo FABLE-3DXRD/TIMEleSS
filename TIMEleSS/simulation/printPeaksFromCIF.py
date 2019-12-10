@@ -98,12 +98,12 @@ def main(argv):
 	
 	# Required arguments
 	parser.add_argument('ciffile', help="Path and name for CIF file")
-	parser.add_argument('-m', '--ttetha_min', required=True, help="Minimum 2 theta (degrees)", type=float)
-	parser.add_argument('-M', '--ttetha_max', required=True, help="Maximum 2 theta (degrees)", type=float)
+	parser.add_argument('-m', '--ttheta_min', required=True, help="Minimum 2 theta (degrees)", type=float)
+	parser.add_argument('-M', '--ttheta_max', required=True, help="Maximum 2 theta (degrees)", type=float)
 	parser.add_argument('-w', '--wavelength', required=True, help="Wavelength (anstroms)", type=float)
 	
 	# Optionnal argument
-	parser.add_argument('-t', '--minI', required=False, help="Filter peaks below a threshold intensity. Default is %(default)s (no filter)", default=-1.0, type=float)
+	parser.add_argument('-c', '--minI', required=False, help="Filter peaks below a cut-off intensity. Default is %(default)s (no filter)", default=-1.0, type=float)
 	parser.add_argument('-n', '--normI', required=False, help="If set to True, intensities are normalized to a maximum of 100. Default is %(default)s (no filter)", default=False, type=bool)
 	parser.add_argument('-o', '--output', required=False, help="If set, saves result to file name. Otherwise, prints results out to screen. Default is %(default)s (no filter)", default=None, type=str)
 	
