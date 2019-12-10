@@ -192,6 +192,7 @@ def peaksFromCIF(ciffile, ttheta_min,  ttheta_max, wavelength, minI = -1.0, norm
 	twotheta = numpy.zeros([len(ds),1])
 	twotheta[:,0] = tth[:]
 	hkls = numpy.concatenate((hkls,twotheta),1)
+	# Remove peaks with intensities below threshold
 	if (minI > 0.0):
 		intensity = hkls[:,4]
 		hkls = hkls[intensity>minI]
