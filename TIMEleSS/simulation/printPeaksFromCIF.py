@@ -29,6 +29,7 @@ from TIMEleSS.general import cifTools
 import sys
 import argparse
 import os.path
+from argparse import RawTextHelpFormatter
 
 def printPeaksFromCIF(ciffile, ttheta_min,  ttheta_max, wavelength, minI = -1.0, normI = False, output=None):
 	"""
@@ -94,7 +95,13 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	parser = MyParser(usage='%(prog)s [options] input.cif', description="Calculate a list of peaks and intensities for single-crystal diffraction based on a CIF file\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
+	parser = MyParser(usage='%(prog)s [options] input.cif', description="""Calculate a list of peaks and intensities for single-crystal diffraction based on a CIF file
+
+Example:
+	%(prog)s -m 4 -M 15 -w 0.3738 -n True -c 5.0 mycif.cif
+
+This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
+""", formatter_class=RawTextHelpFormatter)
 	
 	# Required arguments
 	parser.add_argument('ciffile', help="Path and name for CIF file")
