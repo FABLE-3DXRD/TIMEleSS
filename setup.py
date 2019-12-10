@@ -48,7 +48,7 @@ setup(
     'Science project': 'http://timeless.texure.rocks',
 	},
 	
-	install_requires=['xfab','numpy','scipy','fabio','matplotlib'],
+	install_requires=['xfab','numpy','scipy','fabio','matplotlib','PycifRW'],
 	
 	package_dir = {
 				'TIMEleSS': 'TIMEleSS',
@@ -82,6 +82,7 @@ setup(
 			'timelessClearFLTGrains = TIMEleSS.simulation.clearFLTGrains:run',
 			'timelessSaveFLTGrains = TIMEleSS.simulation.fltForGrains:run',
 			'timelessExtractEulerAngles = TIMEleSS.evaluation.extractEulerAngles:run',
+			'timelessPeaksFromCIF = TIMEleSS.simulation.printPeaksFromCIF:run',
         ],
 		'gui_scripts': [
 		    'timelessPlotIndexedGrain = TIMEleSS.evaluation.testGrainsPeaksGui:run',
