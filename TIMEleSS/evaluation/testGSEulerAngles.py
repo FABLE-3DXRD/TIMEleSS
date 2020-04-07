@@ -40,8 +40,7 @@ import numpy.linalg
 from TIMEleSS.general import multigrainOutputParser
 
 
-# The purpose of this script is to extract the Euler angles from a .log file which was created during a GrainSpotter session. This script creates a list of Euler angles which can then be read by MTeX. The first column should be phi1, the second Phi and the third phi2.
-
+# The purpose of this script is to extract the Euler angles from a .log file which was created during a GrainSpotter session. We calculate a U matrix from the U angles and check against the U matrix in the log file to make sure all is consistent
 
 def check_euler_angles(inputf):
 	file1 = inputf
