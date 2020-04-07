@@ -88,7 +88,7 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	parser = MyParser(usage='%(prog)s [options] input.log', description="Reads an indexing log file from GrainSpotter and make sure that the this of Euler angles is in agreement with the U matrices\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
+	parser = MyParser(usage='%(prog)s ', description="Reads an indexing log file from GrainSpotter and make sure that the this of Euler angles is in agreement with the U matrices\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	# Arguments
 	parser.add_argument('input', help="Path and file name of the indexing log file (required)")
