@@ -83,6 +83,7 @@ setup(
 			'timelessSaveFLTGrains = TIMEleSS.simulation.fltForGrains:run',
 			'timelessExtractEulerAngles = TIMEleSS.evaluation.extractEulerAngles:run',
 			'timelessTestGSEulerAngles = TIMEleSS.evaluation.testGSEulerAngles:run',
+			'timelessTestGSvsGVE = TIMEleSS.evaluation.testGSvsGVE:run',
 			'timelessPeaksFromCIF = TIMEleSS.simulation.printPeaksFromCIF:run',
         ],
 		'gui_scripts': [
