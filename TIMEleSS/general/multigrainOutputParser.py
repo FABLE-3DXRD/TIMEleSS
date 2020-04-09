@@ -555,22 +555,24 @@ def parseGSInput(fname):
 		li=line.strip()
 		if (li[0] != "!"):
 			litxt = li.split()
-			if (litxt[0] = "tthrange"):
+			if (litxt[0] == "tthrange"):
 				mintt = float(litxt[1])
 				maxtt = float(litxt[2])
 				gsInput["tthranges"].append([mintt,maxtt])
-			if (litxt[0] = "uncertainties"):
+			if (litxt[0] == "uncertainties"):
 				gsInput["sigma_tth"] = float(litxt[1])
 				gsInput["sigma_eta"] = float(litxt[2])
 				gsInput["sigma_omega"] = float(litxt[3])
-			if (litxt[0] = "etarange"):
+			if (litxt[0] == "etarange"):
 				mintt = float(litxt[1])
 				maxtt = float(litxt[2])
 				gsInput["etaranges"].append([mintt,maxtt])
-			if (litxt[0] = "omegarange"):
+			if (litxt[0] == "omegarange"):
 				mintt = float(litxt[1])
 				maxtt = float(litxt[2])
 				gsInput["omegaranges"].append([mintt,maxtt])
+			if (litxt[0] == "nsigmas"):
+				gsInput["nsigmas"] = float(litxt[1])
 	f.close()
 	print ("Parsed grain spotter input file from %s" % (fname))
 	return gsInput
