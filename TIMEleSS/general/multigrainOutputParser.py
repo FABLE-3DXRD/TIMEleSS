@@ -523,3 +523,54 @@ def saveGVE(peaks, header, fname):
 	f.close()
 	print ("Saved list of %i peaks into gve file %s" % (len(peaks), fname))
 	return
+
+
+#############################################################################################
+
+"""
+Parser for GrainSpotter input file
+Does not parse everything yet. 
+At present: 
+- 2theta ranges, 
+- eta ranges,
+- omega ranges,
+- uncertainties in angles for indexing, 
+- nsigma
+
+Parameters 
+	- GS input file
+
+Returns
+	A dictionnary with the GS input file information
+
+"""
+def parseGSInput(fname):
+	gsInput = {}
+	gsInput["tthranges"] = []
+	gsInput["etaranges"] = []
+	gsInput["omegaranges"] = []
+	# Read file
+	f = open(fname, 'r')
+	for line in f.readlines():
+		li=line.strip()
+		if (li[0] != "!"):
+			litxt = li.split()
+			if (litxt[0] = "tthrange"):
+				mintt = float(litxt[1])
+				maxtt = float(litxt[2])
+				gsInput["tthranges"].append([mintt,maxtt])
+			if (litxt[0] = "uncertainties"):
+				gsInput["sigma_tth"] = float(litxt[1])
+				gsInput["sigma_eta"] = float(litxt[2])
+				gsInput["sigma_omega"] = float(litxt[3])
+			if (litxt[0] = "etarange"):
+				mintt = float(litxt[1])
+				maxtt = float(litxt[2])
+				gsInput["etaranges"].append([mintt,maxtt])
+			if (litxt[0] = "omegarange"):
+				mintt = float(litxt[1])
+				maxtt = float(litxt[2])
+				gsInput["omegaranges"].append([mintt,maxtt])
+	f.close()
+	print ("Parsed grain spotter input file from %s" % (fname))
+	return gsInput
