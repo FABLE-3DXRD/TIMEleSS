@@ -37,12 +37,17 @@ import numpy
 from TIMEleSS.general import multigrainOutputParser
 
 
-def normalizedAngle(angle):
+def normalizedAngle360(angle):
+	"""
+	Brings an angle back to [0;360)
+	"""
+	return angle - (numpy.floor((angle + 180)/360))*360+180.;           # [0;360):
+
+def normalizedAngle180(angle):
 	"""
 	Brings an angle back to [-180;180)
 	"""
 	return angle - (numpy.floor((angle + 180)/360))*360;           # [-180;180):
-
 
 def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 	"""
@@ -97,11 +102,13 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 		ds0 = 2.*numpy.sin(numpy.radians(tthrange[0]/2.))/(wavelength)
 		ds1 = 2.*numpy.sin(numpy.radians(tthrange[1]/2.))/(wavelength)
 		gsinput["dsranges"].append([ds0,ds1])
+	
+	#print gsinput
 		
 	for peak in peaksgve:
 		thisds = float(peak['ds'])
-		thiseta = float(peak['eta'])
-		thisomega = float(peak['omega'])
+		thiseta = normalizedAngle360(float(peak['eta'])) # In GrainSpotter, eta is in [0;360]
+		thisomega = normalizedAngle180(float(peak['omega'])) # In GrainSpotter, omega is in [-180;180]
 		test1 = 0
 		test2 = 0
 		test3 = 0
@@ -111,9 +118,13 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 		for etarange in gsinput["etaranges"]:
 			if ((thiseta >= etarange[0]) and (thiseta <= etarange[1])):
 				test2 = 1
+			#else:
+			#	print "Not for eta %.1f < %.1f < %.1f" % (etarange[0],thiseta,etarange[1])
 		for omegarange in gsinput["omegaranges"]:
 			if ((thisomega >= omegarange[0]) and (thisomega <= omegarange[1])):
 				test3 = 1
+			#else:
+			#	print "Not for omega %.1f < %.1f < %.1f" % (omegarange[0],thisomega,omegarange[1])
 		if (test1*test2*test3 == 1):
 			ds.append(float(peak['ds']))
 			eta.append(float(peak['eta']))
