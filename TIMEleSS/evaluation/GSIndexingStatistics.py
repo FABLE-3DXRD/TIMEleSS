@@ -59,7 +59,7 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 	
 	# Load .gve file from ImageD11 :
 	[peaksgve,idlist,header] = multigrainOutputParser.parseGVE(gve) 
-	# Extracting list of peaks from the header
+	# Extracting list of g-vectors from the header
 	peakssample = []
 	recordpeaks = False
 	#print header
@@ -81,7 +81,7 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 	# Load the grain spotter input file
 	gsinput =  multigrainOutputParser.parseGSInput(gsinput) 
 	
-	# Try to see if all peaks in the indexed grains are in the gve
+	# Try to see if all g-vectors in the indexed grains are in the gve
 	nindexed = 0
 	ngrains = len(grains)
 	for grain in grains : 
@@ -89,9 +89,9 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 	
 	print "\nGrainSpotter results"
 	print "\t%d grains indexed" % (len(grains))
-	print "\t%d peaks indexed" % (nindexed)
+	print "\t%d g-vectors indexed" % (nindexed)
 	tt = 1.0*nindexed/ngrains
-	print "\t%.1f peaks per grain in average" % (tt)
+	print "\t%.1f g-vectors per grain in average" % (tt)
 	
 	# Matching conditions in angle ranges
 	ds = []
@@ -130,8 +130,8 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 			eta.append(float(peak['eta']))
 			omega.append(float(peak['omega']))
 	print "\nPeaks"
-	print "\t%d peaks in GVE file" % (len(peaksgve))
-	print "\t%d peaks within eta, omega, and 2theta ranges" % (len(ds))
+	print "\t%d g-vectors in GVE file" % (len(peaksgve))
+	print "\t%d g-vectors within eta, omega, and 2theta ranges" % (len(ds))
 
 	# Counting peak, within 2 theta range, and that can be assigned to the sample
 	tttol = gsinput["sigma_tth"]*gsinput["nsigmas"]
@@ -154,14 +154,14 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 			if ((thisds <= dsmax[i]) and (thisds >= dsmin[i])):
 				append = 1
 		nassigned += append
-	print "\t%d peaks assigned to sample within these ranges" % (nassigned)
+	print "\t%d g-vectors assigned to sample within these ranges" % (nassigned)
 	
 	print "\nIndexing performance"
-	print "\tOut of %d possible peaks, %d have been assigned to %d grains" % (nassigned, nindexed, len(grains))
+	print "\tOut of %d possible g-vectors, %d have been assigned to %d grains" % (nassigned, nindexed, len(grains))
 	tt = nassigned-nindexed
-	print "\t%d remaining peaks" % (tt)
+	print "\t%d remaining g-vectors" % (tt)
 	tt = 100.*nindexed/nassigned
-	print "\t%.1f percents of peaks indexed" % (tt)
+	print "\t%.1f percents of g-vectors indexed" % (tt)
 	print 
 	
 	
@@ -188,12 +188,12 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	parser = MyParser(usage='%(prog)s -i gsinput -l logfilestem.log -g gve.gve -w wavelength', description="Reads a GrainSpotter input file, indexing log file, peaks from a GVE file, and pulls out indexing statistics.\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
+	parser = MyParser(usage='%(prog)s -i gsinput -l logfilestem.log -g gve.gve -w wavelength', description="Reads a GrainSpotter input file, indexing log file, experimental g-vectors from a GVE file, and pulls out indexing statistics.\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	# Arguments
 	parser.add_argument('-i','--inputfile', help="Input file name for GrainSpotter. Use the file with the looser conditions if you ran multiple steps of GrainSpotter indexings. (required)", required=True)
 	parser.add_argument('-l','--logfile', help="File name of the indexing log file (required)", required=True)
-	parser.add_argument('-g','--gve', help="File name of the g-vector file (required)", required=True)
+	parser.add_argument('-g','--gve', help="File name of the experimental g-vector file (required)", required=True)
 	parser.add_argument('-w', '--wavelength', help="wavelength, in anstroms (required)", type=float, required=True)
 
 	args = vars(parser.parse_args())
