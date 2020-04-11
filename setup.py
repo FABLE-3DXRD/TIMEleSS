@@ -84,6 +84,7 @@ setup(
 			'timelessExtractEulerAngles = TIMEleSS.evaluation.extractEulerAngles:run',
 			'timelessTestGSEulerAngles = TIMEleSS.evaluation.testGSEulerAngles:run',
 			'timelessTestGSvsGVE = TIMEleSS.evaluation.testGSvsGVE:run',
+			'timeless2thetaHistFromGVE = TIMEleSS.evaluation.twoThetaHistFromGVE:run',
 			'timelessGSIndexingStatistics = TIMEleSS.evaluation.GSIndexingStatistics:run',
 			'timelessPeaksFromCIF = TIMEleSS.simulation.printPeaksFromCIF:run',
         ],
