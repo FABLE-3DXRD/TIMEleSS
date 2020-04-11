@@ -147,7 +147,7 @@ def main(argv):
 	parser.add_argument('-o', '--output',  help="Name of output file (required)")
 	
 	# Optional arguments
-	parser.add_argument('-n', '--nbins', required=False, help="Number of bins. Default is %(default)s",  type=int, default=10000)
+	parser.add_argument('-n', '--nbins', required=False, help="Number of bins. Default is %(default)s",  type=int, default=1000)
 
 	args = vars(parser.parse_args())	
 
