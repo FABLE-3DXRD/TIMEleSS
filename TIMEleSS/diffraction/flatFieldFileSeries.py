@@ -37,7 +37,7 @@ import numpy
 #
 #################################################################
 
-def flatFieldFileSeries(stem,first,last,blank,digits,ext,new,tif,scaling):
+def flatFieldFileSeries(stem,first,last,blank,digits,ext,new,tif,scaling,damping):
 	"""
 	This function calculates the mean for a series of images and saves it in a new file.
 	
@@ -54,21 +54,24 @@ def flatFieldFileSeries(stem,first,last,blank,digits,ext,new,tif,scaling):
 	"""
 	
 	formatfileedf = "%s%0"+str(digits)+"d.edf"
-	formatfileblank = "%s"
+	formatfileblank = "%s%0"+str(digits)+"d.edf"
 
-	#Load the blank image 
-	print "Reading blank"
-	if (not(os.path.isfile(blank))):
-		print ("Error: file %s not found" % blank)
-		sys.exit(2)
-	#open the blank image
-	imblank = fabio.open(blank)
-	#get blank data
-	datablank = (numpy.copy(imblank.data)).astype('int32')
-	#search all values in blank that are zero and replace with one to allow division
-	datablank[datablank<1] = 1
 	# Dividing all images by blank
 	for i in range(first,last+1):
+		#Load the blank image
+		ibfile = formatfileblank % (blank, i)
+		print "Reading " + ibfile
+		if (not(os.path.isfile(ibfile))):
+			print ("Error: file %s not found" % ibfile)
+			sys.exit(2)
+		#open the blank image
+		imblank = fabio.open(ibfile)
+		#get blank data
+		datablank = (numpy.copy(imblank.data)).astype('int32') + damping
+		#search all values in blank that are zero and replace with one to allow division
+		datablank[datablank<1] = 1
+		
+		#load the EDF image
 		ifile = formatfileedf % (stem, i)
 		print "Reading " + ifile
 		if (not(os.path.isfile(ifile))):
@@ -77,7 +80,7 @@ def flatFieldFileSeries(stem,first,last,blank,digits,ext,new,tif,scaling):
 		# Open the EDF image file
 		imedf = fabio.open(ifile)
 		# get data and convert to float for division
-		data = (numpy.copy(imedf.data)).astype('float32')
+		data = (numpy.copy(imedf.data)).astype('float32') + damping
 		max1 = numpy.amax(data)
 		#divide first image by blank
 		newdata = data / datablank
@@ -127,20 +130,21 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	parser = MyParser(usage='%(prog)s -n sterm -f first -l last -o newfilename', description="Takes the mean of multiple EDF images\nHeader parameters such as OmegaMin, OmegaMax, Omega, OmegaPos are reset.\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
+	parser = MyParser(usage='%(prog)s -n namestem -f first -l last -blk blankstem -o newfilename', description="Corrects a series of EDF images by a series of blank images.\nHeader parameters such as OmegaMin, OmegaMax, Omega, OmegaPos are reset.\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	# Required parameters
 	parser.add_argument('-n', '--stem', required=True, help="Stem for images files (required)")
 	parser.add_argument('-f', '--first', required=True, help="First image number (required)", type=int)
 	parser.add_argument('-l', '--last', required=True, help="Last image number (required)", type=int)
-	parser.add_argument('-blk', '--blank', required=True, help="Blank image name (required)")
+	parser.add_argument('-blk', '--blank', required=True, help="Blank stem name (required)")
 	parser.add_argument('-o', '--output', required=True, help="Name of output file")
 	
 	# Optionnal arguments
 	parser.add_argument('-d', '--ndigits', required=False, help="Number of digits for file number. Default is %(default)s", type=int, default=4)
 	parser.add_argument('-e', '--extension', required=False, help="File extension. Default is %(default)s", type=str, default="edf")
 	parser.add_argument('-t', '--tif', required=False, help="Save in tiff instead of EDF if True. Default is %(default)s", type=bool, default=False)
-	parser.add_argument('-s', '--scale', required=False, help="Scaling factor for new data, lower the value if intensities saturate. Default is %(default)s", type=int, default=100000)
+	parser.add_argument('-s', '--scale', required=False, help="Scaling factor. Determines the average background intensity. Default is %(default)s", type=int, default=100)
+	parser.add_argument('-dmp', '--damp', required=False, help="Increase the value to make the background less noisy. Default is %(default)s", type=int, default=20)
 
 	# Parsing command line
 	args = vars(parser.parse_args())
@@ -154,9 +158,10 @@ def main(argv):
 	output = args['output']
 	tif =  args['tif']
 	scaling = args['scale']
+	damping = args['damp']
 	
 	# Perform the division
-	flatFieldFileSeries(stem,first,last,blank,digits,ext,output,tif,scaling)
+	flatFieldFileSeries(stem,first,last,blank,digits,ext,output,tif,scaling,damping)
 
 
 
