@@ -87,7 +87,7 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	parser = MyParser(usage='%(prog)s GSFile, oldGVE.gve newGVE.gve', description="Creates a new list of g-vectors, removing g-vectors which have already been assigned to grains by GrainSpotter\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
+	parser = MyParser(usage='%(prog)s GSFile oldGVE.gve newGVE.gve', description="Creates a new list of g-vectors, removing g-vectors which have already been assigned to grains by GrainSpotter\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	# Required arguments
 	parser.add_argument('gsfile',  help="Name of GrainSpotter output file (required)")
