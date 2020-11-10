@@ -46,7 +46,7 @@ import grainComparison
 #
 #################################################################
 
-def grainSpotterMerge(files, crystal_system, cutoff, outputstem):
+def grainSpotterMerge(files, crystal_system, cutoff, outputstem,skipbogus):
 	"""
 	Function designed to merge output from multiple GrainSpotter indexing
 
@@ -65,6 +65,7 @@ def grainSpotterMerge(files, crystal_system, cutoff, outputstem):
 	  crystal_system - see above
 	  outputstem - stem for output file for the grain comparison
 	  cutoff - mis-orientation below which the two grains are considered identical, in degrees
+	  skipbogus - if set to true, skip bogus grains in GS output (grains with 0 peaks)
 	"""
 	
 	filename1 = "%s-%s" % (outputstem , "log.dat")
@@ -73,7 +74,7 @@ def grainSpotterMerge(files, crystal_system, cutoff, outputstem):
 	# Reading list of grains from all files
 	grainLists = []
 	for filename in files:
-		grains = multigrainOutputParser.parseGrains(filename)
+		grains = multigrainOutputParser.parseGrains(filename,skipbogus)
 		grainLists.append(grains)
 		logit(logfile, "Parsed %s, found %d grains" % (filename, len(grains)))
 	
@@ -139,7 +140,7 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	parser = argparse.ArgumentParser(usage='%(prog)s [options] file1 file2', description="Merges grains from multiple GrainSpotter indexings\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
+	parser = argparse.ArgumentParser(usage='%(prog)s [options] file1 file2 ... fileN', description="Merges grains from multiple GrainSpotter indexings\nThis is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	parser.add_argument('files', type=str, nargs='+', help='grainSpotter output files')
 	
@@ -156,6 +157,8 @@ def main(argv):
 	parser.add_argument('-o', '--output_stem', required=False, help="Stem for output files. Default is %(default)s", default="merge")
 	
 	parser.add_argument('-m', '--misorientation', required=False, help="Misorientation below which two grains are considered identical, in degrees. Default is %(default)s", default=2.0, type=float)
+	
+	parser.add_argument('-s', '--skipbogus', required=False, help="Skip bogus grains in GrainSpotter output. Default is  Default is %(default)s", type=bool, default=False)
 
 	args = vars(parser.parse_args())
 
@@ -163,13 +166,14 @@ def main(argv):
 	crystal_system = args['crystal_system']
 	stem = args['output_stem']
 	cutoff = args['misorientation']
+	skipbogus = args['skipbogus']
 	
 	for filename in files:
 		if (not(os.path.isfile(filename))):
 			print ("Error: file %s not found" % filename)
 			sys.exit(2)
 
-	grainSpotterMerge(files, crystal_system, cutoff, stem)
+	grainSpotterMerge(files, crystal_system, cutoff, stem, skipbogus)
 
 
 # Calling method 1 (used when generating a binary in setup.py)
