@@ -31,9 +31,9 @@ import os.path
 
 from TIMEleSS.general import multigrainOutputParser
 
-def cropGVE(grainfile, oldgvefile, newgvefile, verbose):
+def cropGVE(grainfile, oldgvefile, newgvefile, verbose, skipbogus):
 
-	grains = multigrainOutputParser.parse_GrainSpotter_log(grainfile)
+	grains = multigrainOutputParser.parse_GrainSpotter_log(grainfile,skipbogus)
 	print "Parsed grains from %s" % grainfile
 	print "Number of grains: %d" % len(grains)
 	
@@ -95,6 +95,7 @@ def main(argv):
 	parser.add_argument('newGVE',  help="Name of G-vector file to be created (required)")
 	
 	parser.add_argument('-v', '--verbose', required=False, help="Write out more details about what it does. Default is  Default is %(default)s", type=bool, default=False)
+	parser.add_argument('-s', '--skipbogus', required=False, help="Skip bogus grains in GrainSpotter output. Default is  Default is %(default)s", type=bool, default=False)
 
 	args = vars(parser.parse_args())
 
@@ -102,9 +103,10 @@ def main(argv):
 	oldGVE = args['oldGVE']
 	newGVE = args['newGVE']
 	verbose = args['verbose']
+	skipbogus = args['skipbogus']
 
 
-	cropGVE(gsfile, oldGVE, newGVE, verbose)
+	cropGVE(gsfile, oldGVE, newGVE, verbose, skipbogus)
 
 
 # Calling method 1 (used when generating a binary in setup.py)
