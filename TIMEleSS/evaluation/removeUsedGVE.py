@@ -12,6 +12,12 @@ import numpy
 # TIMEleSS parsing utilities
 from TIMEleSS.general import multigrainOutputParser 
 
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+# Nov. 2020
+# Please, avoid updating this script. The simulation.clearGVEGrains has been updated with more options
+#
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 class MyParser(argparse.ArgumentParser):
 	"""
