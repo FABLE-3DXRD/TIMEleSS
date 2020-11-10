@@ -87,6 +87,7 @@ setup(
 			'timeless2thetaHistFromGVE = TIMEleSS.evaluation.twoThetaHistFromGVE:run',
 			'timelessGSIndexingStatistics = TIMEleSS.evaluation.GSIndexingStatistics:run',
 			'timelessPeaksFromCIF = TIMEleSS.simulation.printPeaksFromCIF:run',
+			'timelessFixGSOutput = TIMEleSS.evaluation.fixGrainSpotterOuput:run',
         ],
 		'gui_scripts': [
 		    'timelessPlotIndexedGrain = TIMEleSS.evaluation.testGrainsPeaksGui:run',
