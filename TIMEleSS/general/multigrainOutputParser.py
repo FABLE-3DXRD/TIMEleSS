@@ -59,14 +59,15 @@ Returns
 
 Parameters
 	filename: name and path to the gff or the GrainSpotter log file
+	stoponerror: set to false if you do not want to stop on errors (0 peaks in a grain for grainspotter, for instance)
 """
 
-def parseGrains(filename):
+def parseGrains(filename,stoponerror=True):
 	fff, file_extension = os.path.splitext(filename)
 	if (file_extension == ".gff"):
 		return parse_gff(filename)
 	elif (file_extension == ".log"):
-		return parse_GrainSpotter_log(filename)
+		return parse_GrainSpotter_log(filename,stoponerror)
 	elif (file_extension == ".ubi"):
 		return parse_ubi(filename)
 	else:
@@ -85,8 +86,9 @@ Returns
 
 Parameters
 	logfile: name and path to GrainSpotter log file
+	stoponerror: set to false if you do not want to stop on errors (0 peaks in a grain for grainspotter, for instance)
 """
-def parse_GrainSpotter_log(logfile):
+def parse_GrainSpotter_log(logfile,stoponerror=True):
 	# Read LOG file
 	f = open(logfile, 'r')
 	# reads number of grains found
@@ -126,10 +128,14 @@ def parse_GrainSpotter_log(logfile):
 		GrainNumW=a[1][:-1]
 		GrainNum=int(GrainNumW)
 		if (numbpeaks < 1):
-			print "\nWarning!!!\n\nGrain %d in %s has only %d peaks!" % (GrainNum, logfile, numbpeaks)
-			print "\nSomething is very wrong with your grain spotter output file"
-			print "I stop here...\n"
-			sys.exit(0)
+			print "Warning!!!\nGrain %d in %s has only %d peaks!" % (GrainNum, logfile, numbpeaks)
+			print "Something is very wrong with your grain spotter output file"
+			if (stoponerror):
+				print "I stop here...\n"
+				sys.exit(0)
+			else: # Skip grain
+				print "Skip this grain...\n"
+				continue
 			
 		#print GrainNum, a[1]
 		grain = grain3DXRD.Grain()
