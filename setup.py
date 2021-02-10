@@ -88,6 +88,7 @@ setup(
 			'timelessGSIndexingStatistics = TIMEleSS.evaluation.GSIndexingStatistics:run',
 			'timelessPeaksFromCIF = TIMEleSS.simulation.printPeaksFromCIF:run',
 			'timelessFixGSOutput = TIMEleSS.evaluation.fixGrainSpotterOutput:run',
+			'timelessTthHistogram2Maud = TIMEleSS.evaluation.tthHistogram2Maud:run',
         ],
 		'gui_scripts': [
 		    'timelessPlotIndexedGrain = TIMEleSS.evaluation.testGrainsPeaksGui:run',
