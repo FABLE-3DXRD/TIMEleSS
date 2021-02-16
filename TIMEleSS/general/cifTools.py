@@ -47,7 +47,7 @@ def open_cif(param,phase):
 	Created: 12/2019, S. Merkel, Univ. Lille, France
 	"""
 	file = param['structure_phase_%i' %phase]
-	cf = ReadCif(file)
+	cf = ReadCif(file) # Generate an error if reading cif fails which is not always true below
 	struct = structure.build_atomlist()
 	struct.CIFread(ciffile=file)
 	param['sgno_phase_%i' %phase] = sg.sg(sgname=struct.atomlist.sgname).no
