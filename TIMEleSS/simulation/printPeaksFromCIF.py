@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*
 
 """
@@ -66,7 +66,7 @@ def printPeaksFromCIF(ciffile, ttheta_min,  ttheta_max, wavelength, minI = -1.0,
 		string += "% d % d % d  %5.1f  %.6f  %6.3f\n" % (hkl[0], hkl[1], hkl[2], hkl[4], hkl[3], hkl[5])
 		
 	if output is None:
-		print string
+		print (string)
 	else:
 		f= open(output,"w+")
 		f.write(string)
