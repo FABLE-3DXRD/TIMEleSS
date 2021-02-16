@@ -128,16 +128,15 @@ def parse_GrainSpotter_log(logfile,stoponerror=True):
 		GrainNumW=a[1][:-1]
 		GrainNum=int(GrainNumW)
 		if (numbpeaks < 1):
-			print "Warning!!!\nGrain %d in %s has only %d peaks!" % (GrainNum, logfile, numbpeaks)
-			print "Something is very wrong with your grain spotter output file"
+			print ("Warning!!!\nGrain %d in %s has only %d peaks!" % (GrainNum, logfile, numbpeaks))
+			print ("Something is very wrong with your grain spotter output file")
 			if (stoponerror):
-				print "I stop here...\n"
+				print ("I stop here...\n")
 				sys.exit(0)
 			else: # Skip grain
-				print "Skip this grain...\n"
+				print ("Skip this grain...\n")
 				continue
 			
-		#print GrainNum, a[1]
 		grain = grain3DXRD.Grain()
 		grain.setFileName(logfile)
 		grain.setNPeaks(numbpeaks)
@@ -160,10 +159,10 @@ def parse_GrainSpotter_log(logfile,stoponerror=True):
 			UBI[0,i] = float(line1[i])
 			UBI[1,i] = float(line2[i])
 			UBI[2,i] = float(line3[i])
-		#print "UBI = ", UBI
-		#print "BI = ", scipy.dot(UBI,U)
+		#print ("UBI = ", UBI)
+		#print ("BI = ", scipy.dot(UBI,U))
 		B =scipy.linalg.inv(scipy.dot(UBI,U))
-		#print "B = ", B
+		#print ("B = ", B)
 		# Setting information
 		grain.setUBBi(U,B,UBI)
 		# extracting the Euler angles phi1 phi phi2
