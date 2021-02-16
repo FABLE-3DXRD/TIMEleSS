@@ -97,7 +97,7 @@ class twothetahistogram:
 			return
 		self.nbins = nbins
 		self.hist = numpy.histogram(self.twotheta,self.nbins)
-		print "Calculated a %d elements two-theta histograms based on peaks in %s" % (self.nbins,self.gvefile)
+		print ("Calculated a %d elements two-theta histograms based on peaks in %s" % (self.nbins,self.gvefile))
 		
 	"""
 	Saves this histogram to a file
@@ -111,7 +111,7 @@ class twothetahistogram:
 		for i in range(0,self.nbins):
 			out.write("%.4f %.4e\n" % (self.hist[1][i], (1.0*self.hist[0][i]/self.npeaks)))
 		out.close()
-		print "Saved two theta histograms in %s" % (output)
+		print ("Saved two theta histograms in %s" % (output))
 
 
 #################################################################
