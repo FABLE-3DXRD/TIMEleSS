@@ -24,6 +24,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+
 # System functions, to manipulate command line arguments
 import sys
 import argparse
@@ -35,6 +39,7 @@ import numpy
 
 # TIMEleSS parsing utilities
 from TIMEleSS.general import multigrainOutputParser
+from six.moves import range
 
 
 def normalizedAngle360(angle):
@@ -55,7 +60,7 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 	Send the final GrainSpotter log, the list of g-vectors, the GS input file (with the loosest conditions), and the wavelength
 	"""
 	grains = multigrainOutputParser.parseGrains(logfile)
-	print "Parsed %s, found %d grains" % (logfile, len(grains))
+	print("Parsed %s, found %d grains" % (logfile, len(grains)))
 	
 	# Load .gve file from ImageD11 :
 	[peaksgve,idlist,header] = multigrainOutputParser.parseGVE(gve) 
@@ -87,11 +92,11 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 	for grain in grains : 
 		nindexed += grain.getNPeaks()
 	
-	print "\nGrainSpotter results"
-	print "\t%d grains indexed" % (len(grains))
-	print "\t%d g-vectors indexed" % (nindexed)
+	print("\nGrainSpotter results")
+	print("\t%d grains indexed" % (len(grains)))
+	print("\t%d g-vectors indexed" % (nindexed))
 	tt = 1.0*nindexed/ngrains
-	print "\t%.1f g-vectors per grain in average" % (tt)
+	print("\t%.1f g-vectors per grain in average" % (tt))
 	
 	# Matching conditions in angle ranges
 	ds = []
@@ -129,9 +134,9 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 			ds.append(float(peak['ds']))
 			eta.append(float(peak['eta']))
 			omega.append(float(peak['omega']))
-	print "\nPeaks"
-	print "\t%d g-vectors in GVE file" % (len(peaksgve))
-	print "\t%d g-vectors within eta, omega, and 2theta ranges" % (len(ds))
+	print("\nPeaks")
+	print("\t%d g-vectors in GVE file" % (len(peaksgve)))
+	print("\t%d g-vectors within eta, omega, and 2theta ranges" % (len(ds)))
 
 	# Counting peak, within 2 theta range, and that can be assigned to the sample
 	tttol = gsinput["sigma_tth"]*gsinput["nsigmas"]
@@ -154,15 +159,15 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 			if ((thisds <= dsmax[i]) and (thisds >= dsmin[i])):
 				append = 1
 		nassigned += append
-	print "\t%d g-vectors assigned to sample within these ranges" % (nassigned)
+	print("\t%d g-vectors assigned to sample within these ranges" % (nassigned))
 	
-	print "\nIndexing performance"
-	print "\tOut of %d possible g-vectors, %d have been assigned to %d grains" % (nassigned, nindexed, len(grains))
+	print("\nIndexing performance")
+	print("\tOut of %d possible g-vectors, %d have been assigned to %d grains" % (nassigned, nindexed, len(grains)))
 	tt = nassigned-nindexed
-	print "\t%d remaining g-vectors" % (tt)
+	print("\t%d remaining g-vectors" % (tt))
 	tt = 100.*nindexed/nassigned
-	print "\t%.1f percents of g-vectors indexed" % (tt)
-	print 
+	print("\t%.1f percents of g-vectors indexed" % (tt))
+	print() 
 	
 	
 	return
