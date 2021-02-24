@@ -392,11 +392,21 @@ def parseFLT(fname):
 	idlist = []
 	# Read file
 	f = open(fname, 'r')
-	# Dealing with header, so we know what we are reading
 	lines = f.readlines()
-	header = lines[0]
+	f.close()
+	# Dealing with header, so we know what we are reading
+	# Header is the last line with a pound symbol
+	headerline = -1
+	for line in lines:
+		li=line.strip()
+		if not li.startswith("#"):
+			break
+		else:
+			headerline += 1
+	header = lines[headerline]
 	stringlist = header.split()
 	del stringlist[0]
+	# print ("stringlist is", stringlist)
 	# Reading peak information
 	for line in lines:
 		li=line.strip()
@@ -408,7 +418,6 @@ def parseFLT(fname):
 			thisid = int(peak["spot3d_id"])
 			idlist.append(thisid)
 			peaks.append(peak)
-	f.close()
 	print ("Parsed list of peaks from flt file %s, found %i peaks" % ( fname, len(peaks)))
 	return [peaks,idlist,header]
 
