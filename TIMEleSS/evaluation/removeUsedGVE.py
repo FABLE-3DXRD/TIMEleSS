@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -* 
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+
 # System functions, to manipulate command line arguments
 import sys
 import argparse
@@ -83,9 +87,9 @@ def RemoveUsedGVE(logfile,gve_input,gve_output):
     # Save the new list of (not indexed) peaks in .gve format : 
     newPeakslist = [peaks for peaks in peaksgve if peaks not in gveToRemove]
     OutputPeaks = multigrainOutputParser.saveGVE(newPeakslist, header, gve_output)
-    print '\n%s g-vectors were removed.' %len(gveToRemove)
-    print '\nThe new list contains %s g-vectors.' %len(newPeakslist)
-    print '\nSaved'
+    print('\n%s g-vectors were removed.' %len(gveToRemove))
+    print('\nThe new list contains %s g-vectors.' %len(newPeakslist))
+    print('\nSaved')
 
 
 
