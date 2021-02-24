@@ -23,6 +23,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 # System functions, to manipulate command line arguments
 import sys
@@ -34,6 +37,7 @@ import numpy
 
 # TIMEleSS parsing utilities
 from TIMEleSS.general import multigrainOutputParser
+from six.moves import range
 
 #################################################################
 #
@@ -104,12 +108,12 @@ class twothetahistogram:
 	"""
 	def savetofile(self,output):
 		out = open(output,'w')
-		out.write("# Histograms of two theta angles in %s\n" % self.gvefile)
-		out.write("# Original number of peaks: %d\n" % self.npeaks)
-		out.write("# Number of bins: %d\n" % self.nbins)
-		out.write("# Two theta (degrees), proportion of peaks in bin\n#\n")
+		out.write ("# Histograms of two theta angles in %s\n" % self.gvefile)
+		out.write ("# Original number of peaks: %d\n" % self.npeaks)
+		out.write ("# Number of bins: %d\n" % self.nbins)
+		out.write ("# Two theta (degrees), proportion of peaks in bin\n#\n")
 		for i in range(0,self.nbins):
-			out.write("%.4f %.4e\n" % (self.hist[1][i], (1.0*self.hist[0][i]/self.npeaks)))
+			out.write ("%.4f %.4e\n" % (self.hist[1][i], (1.0*self.hist[0][i]/self.npeaks)))
 		out.close()
 		print ("Saved two theta histograms in %s" % (output))
 
