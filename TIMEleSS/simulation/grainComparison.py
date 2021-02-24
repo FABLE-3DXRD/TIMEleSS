@@ -23,6 +23,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
 
 # System functions, to manipulate command line arguments
 import sys
@@ -81,7 +85,7 @@ numpy.
     except TypeError:
         del u  # move on to the next method
     else:
-        return u.keys()
+        return list(u.keys())
 
     # We can't hash all the elements.  Second fastest is to sort,
     # which brings the equal elements together; then duplicates are
@@ -312,7 +316,7 @@ def comparaison(file1, file2, crystal_system, cutoff, outputstem, verbose):
 	filename4 = "%s-%s" % (outputstem , "missing-grains.dat")
 	logmissing = open(filename4,'w')
 	if (not verbose):
-		print ("4 output files will be generated: \n- %s,\n- %s,\n- %s,\n- %s\n" % (filename1, filename2, filename3, filename4))
+		print("4 output files will be generated: \n- %s,\n- %s,\n- %s,\n- %s\n" % (filename1, filename2, filename3, filename4))
 	else:
 		filename5 = "%s-%s" % (outputstem , "verbose.dat")
 		logverbose = open(filename5,'w')
@@ -432,7 +436,7 @@ def main(argv):
 	parser.add_argument('file1', help="first grain file, used as a reference (gff, ubi, or GrainSpotter output file, based on extension)")
 	parser.add_argument('file2', help="second grain file, matched against the previous file (gff, ubi, or GrainSpotter output file, based on extension)")
 	
-	parser.add_argument('-c', '--crystal_system', type=int, choices=range(1, 8), required=True, help="""Crystal system. Can be one of the following 
+	parser.add_argument('-c', '--crystal_system', type=int, choices=list(range(1, 8)), required=True, help="""Crystal system. Can be one of the following 
     1: Triclinic
     2: Monoclinic
     3: Orthorhombic
@@ -459,11 +463,11 @@ def main(argv):
 	verbose = args['verbose']
 	
 	if (not(os.path.isfile(file1))):
-		print ("Error: file %s not found" % file1)
+		print(("Error: file %s not found" % file1))
 		sys.exit(2)
 		
 	if (not(os.path.isfile(file2))):
-		print ("Error: file %s not found" % file2)
+		print(("Error: file %s not found" % file2))
 		sys.exit(2)
 
 	comparaison(file1, file2, crystal_system, cutoff, stem, verbose)
