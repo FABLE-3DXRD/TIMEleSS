@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*
 
 """
@@ -21,6 +21,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
+
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 # TIMEleSS CIF file utilities
 from TIMEleSS.general import cifTools
