@@ -23,6 +23,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 # System functions, to manipulate command line arguments
 import sys
@@ -34,32 +37,32 @@ from TIMEleSS.general import multigrainOutputParser
 def cropFLT(grainfile, oldfltfile, newfltfile, verbose):
 
 	grains = multigrainOutputParser.parse_GrainSpotter_log(grainfile)
-	print "Parsed grains from %s" % grainfile
-	print "Number of grains: %d" % len(grains)
+	print("Parsed grains from %s" % grainfile)
+	print("Number of grains: %d" % len(grains))
 	
 	[peaksflt,idlist,header] = multigrainOutputParser.parseFLT(oldfltfile)
 
-	print "Removing peaks which have been assigned to grains in %s" % grainfile
+	print("Removing peaks which have been assigned to grains in %s" % grainfile)
 
 	for grain in grains:
 		if (verbose):
-			print "Looking at grain %s" % grain.getName()
+			print("Looking at grain %s" % grain.getName())
 		peaks = grain.getPeaks()
 		# Sometimes, GrainSpotter indexes the same peak twice. We need to remove those double indexings
 		peakid = []
 		for peak in peaks:
 			peakid.append(peak.getPeakID())
 		peakid = list(set(peakid)) # remove duplicates, may loose the ordering but we do not care
-		# Removing assign peaks from the list of g-vectors
+		# Removing assign peaks from the list of peaks
 		for thisid in peakid:
 			index = idlist.index(thisid)
 			if (verbose):
-				print "Trying to remove peak %d from the list of g-vectors" % thisid
+				print("Trying to remove peak %d from the list of peaks" % thisid)
 			try:
 				del idlist[index]
 				del peaksflt[index]
 			except IndexError:
-				print "Failed removing g-vector ID %d which was found in grain %s" % (thisid, grain.getName())
+				print("Failed removing peak ID %d which was found in grain %s" % (thisid, grain.getName()))
 				return
 	# print len(peaksflt)
 
