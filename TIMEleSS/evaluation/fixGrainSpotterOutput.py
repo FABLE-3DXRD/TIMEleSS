@@ -23,6 +23,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 # System functions, to manipulate command line arguments
 import sys
@@ -53,9 +56,9 @@ def grainSpotterClean(inputfile, outputfile):
 	
 	# Reading list of grains from all files
 	grains = multigrainOutputParser.parseGrains(inputfile,False)
-	print("Parsed %s, found %d grains" % (inputfile, len(grains)))
+	print ("Parsed %s, found %d grains" % (inputfile, len(grains)))
 	multigrainOutputParser.saveGrainSpotter(outputfile,grains)
-	print("Saved %d grains in %s" % (len(grains), outputfile))
+	print ("Saved %d grains in %s" % (len(grains), outputfile))
 
 #################################################################
 #
@@ -80,7 +83,7 @@ def main(argv):
 	output = args['output']
 	
 	if (not(os.path.isfile(filename))):
-		print ("Error: file %s not found" % filename)
+		print(("Error: file %s not found" % filename))
 		sys.exit(2)
 
 	grainSpotterClean(filename, output)
