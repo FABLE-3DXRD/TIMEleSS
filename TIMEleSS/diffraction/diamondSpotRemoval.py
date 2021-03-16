@@ -54,6 +54,9 @@ import scipy.ndimage
 import scipy.ndimage.filters
 import scipy.ndimage.morphology
 
+# Image manipulation library
+import PIL.Image
+
 # Inpaint into a mask
 from . import inpaint
 
@@ -120,7 +123,10 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
 		# Nearest interpolation is important to keep the spots and avoid oversmoothing the image
 		# http://matplotlib.sourceforge.net/users/image_tutorial.html
 		print("Rescaling to %dx%d..." % (scale,scale))
-		datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+		# Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		# datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+		datascale = numpy.array(PIL.Image.fromarray(data).resize((scale,scale),resample=PIL.Image.NEAREST))
 		max = datascale.max()
 		datascale = datascale*oldmax/max
 		meandata = datascale.mean()
@@ -212,7 +218,10 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
 		oldmin = data.min()
 		# Resizing data, we do not need full resolution to find diamond spots!
 		# Better to work on low resolution, removed a lot of false positives
-		datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+		# datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+        # Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		datascale = numpy.array(PIL.Image.fromarray(data).resize((scale,scale),resample=PIL.Image.NEAREST))
 		max = datascale.max()
 		datascale = datascale*oldmax/max
 		meandata = datascale.mean()
@@ -298,7 +307,11 @@ def plotMask(edfimagepath, stem, first, last, mask, ndigits=4, extension='edf'):
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
-		maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+		# maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+        # Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		# datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+		maskscaled = numpy.array(PIL.Image.fromarray(thismask).resize((xsize,ysize),resample=PIL.Image.NEAREST))
 		# Plotting data and mask
 		plt.title(image)                                   # set a title
 		p = plt.imshow(data, cmap='gray',origin='lower')          # plot the image
@@ -352,7 +365,10 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
-		maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+		# maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+		# Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		maskscaled = numpy.array(PIL.Image.fromarray(thismask).resize((xsize,ysize),resample=PIL.Image.NEAREST))
 		# Creating data under mask using linear interpolation or inpainting
 		# Need to create a list of points for which we have data
 		# Actually, gave up, fill with median value!
@@ -425,7 +441,9 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
-		maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest',mode='F')
+		#maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest',mode='F')		# Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		maskscaled = numpy.array(PIL.Image.fromarray(thismask).resize((xsize,ysize),resample=PIL.Image.NEAREST))
 		# Creating data under mask using linear interpolation or inpainting
 		# Need to create a list of points for which we have data
 		# Actually, gave up, fill with median value!
@@ -435,13 +453,19 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 			# We rescale the image and inpaint on a smaller version. Before reducing, remove extreme intensity values (it works better)
 			datacopy = data.copy()
 			datacopy = datacopy.clip(0., 10.*meanI)
-			datareduced = scipy.misc.imresize(datacopy,(thismask.shape[0],thismask.shape[1]),interp='nearest',mode='F')
+			#datareduced = scipy.misc.imresize(datacopy,(thismask.shape[0],thismask.shape[1]),interp='nearest',mode='F')
+			# Scipy.misc.imresize is deprecated
+			# Moving to a similar call using the PIL library
+			datareduced = numpy.array(PIL.Image.fromarray(datacopy).resize((thismask.shape[0],thismask.shape[1]),resample=PIL.Image.NEAREST))
 			# Setting mask data as NaN and call for inpainting. Parameters have been set from trial and error
 			idx2=(thismask>0)
 			datareduced[idx2] = numpy.NaN
 			result0 = inpaint.replace_nans(datareduced, max_iter=20, tol=1., kernel_radius=2, kernel_sigma=5, method='idw')
 			# Rescaling inpainted image and set new values at mask positions
-			result0 = scipy.misc.imresize(result0,(xsize,ysize),interp='nearest',mode='F')
+			# result0 = scipy.misc.imresize(result0,(xsize,ysize),interp='nearest',mode='F')
+			# Scipy.misc.imresize is deprecated
+			# Moving to a similar call using the PIL library
+			result0 = numpy.array(PIL.Image.fromarray(result0).resize((xsize,ysize),resample=PIL.Image.NEAREST))
 			data[idx] = result0[idx]
 		else:
 			# Fill maslwith median value!
