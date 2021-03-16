@@ -22,6 +22,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+
 # TIMEleSS CIF file utilities
 from TIMEleSS.general import cifTools
 
@@ -66,7 +70,7 @@ def printPeaksFromCIF(ciffile, ttheta_min,  ttheta_max, wavelength, minI = -1.0,
 		string += "% d % d % d  %5.1f  %.6f  %6.3f\n" % (hkl[0], hkl[1], hkl[2], hkl[4], hkl[3], hkl[5])
 		
 	if output is None:
-		print string
+		print (string)
 	else:
 		f= open(output,"w+")
 		f.write(string)

@@ -24,6 +24,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 # System functions, to manipulate command line arguments
 import sys
@@ -46,9 +49,9 @@ def check_euler_angles(inputf):
 	file1 = inputf
 	grains1 = multigrainOutputParser.parseGrains(file1)
 	ngrains1 = len(grains1)
-	print "Parsed %s, found %d grains" % (file1, len(grains1))
+	print ("Parsed %s, found %d grains" % (file1, len(grains1)))
 	unity = numpy.identity(3)
-	print "Comparing Euler angles and U matrices. Making sure they match."
+	print ("Comparing Euler angles and U matrices. Making sure they match.")
 	for grain in grains1:
 		angles = grain.geteulerangles()
 		U = grain.getU()
@@ -61,9 +64,9 @@ def check_euler_angles(inputf):
 		U2 = numpy.matrix([[cphi1*cphi2-sphi1*sphi2*cPhi, -cphi1*sphi2-sphi1*cphi2*cPhi, sphi1*sPhi], [sphi1*cphi2+cphi1*sphi2*cPhi, -sphi1*sphi2+cphi1*cphi2*cPhi, -cphi1*sPhi], [sphi2*sPhi, cphi2*sPhi, cPhi]])
 		C = U.dot(numpy.linalg.inv(U2))
 		if (not numpy.allclose(C,unity)):
-			print "Problem with grain %s" % grain.getName()
-			print C
-	print "Done."
+			print ("Problem with grain %s" % grain.getName())
+			print (C)
+	print ("Done.")
 	return
 
 

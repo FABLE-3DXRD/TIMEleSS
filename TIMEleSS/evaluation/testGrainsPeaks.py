@@ -23,6 +23,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 # System functions, to manipulate command line arguments
 import sys
@@ -133,7 +136,7 @@ class grainPlotData:
 				fsmeasured[0,i] = self.peaksflt[index]['sc']
 				omegaexp[i] = self.peaksflt[index]['omega']
 			except IndexError:
-				print "Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName())
+				print ("Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName()))
 				return
 			i += 1
 			

@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
 from __future__ import print_function # To make print statements compatible with python3
+from six.moves import range
+
 
 """
 This is part of the TIMEleSS tools
@@ -24,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
 
+
 """
 Functions to remove diamond spots from a 3D-XRD images
  - test of various filter options
@@ -31,6 +36,7 @@ Functions to remove diamond spots from a 3D-XRD images
  
 Original version, 6/Jul/2012
 """
+
 
 
 # System functions, to manipulate command line arguments
@@ -48,8 +54,11 @@ import scipy.ndimage
 import scipy.ndimage.filters
 import scipy.ndimage.morphology
 
+# Image manipulation library
+import PIL.Image
+
 # Inpaint into a mask
-import inpaint
+from . import inpaint
 
 # Fabio, from ESRF fable package
 import fabio
@@ -84,9 +93,9 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
 	imagename = os.path.join(edfimagepath, medianename)
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
-	print("Dimensions of median image: ", medianeIm.getDims())
-	medianeData = medianeIm.getData().astype('float32')
-	print("Dimensions of median image: ", medianeIm.getDims())
+	print("Dimensions of median image: ", medianeIm.shape)
+	medianeData = medianeIm.data.astype('float32')
+	print("Dimensions of median image: ", medianeIm.shape)
 	print("Median info: ", medianeData.min(),  medianeData.max(), medianeData.mean())
 	
 	# Loop on images and test median substraction
@@ -98,8 +107,8 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
 		print("Reading " + imagename)
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		print("Dimensions: ", im.getDims())
-		data = im.getData().astype('float32')
+		print("Dimensions: ", im.shape)
+		data = im.data.astype('float32')
 		print("Image info (min, max, mean): ", data.min(),  data.max(), data.mean())
 		print("Substraction median...")
 		# Removing median image
@@ -114,7 +123,10 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
 		# Nearest interpolation is important to keep the spots and avoid oversmoothing the image
 		# http://matplotlib.sourceforge.net/users/image_tutorial.html
 		print("Rescaling to %dx%d..." % (scale,scale))
-		datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+		# Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		# datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+		datascale = numpy.array(PIL.Image.fromarray(data).resize((scale,scale),resample=PIL.Image.NEAREST))
 		max = datascale.max()
 		datascale = datascale*oldmax/max
 		meandata = datascale.mean()
@@ -178,9 +190,9 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
 	imagename = os.path.join(edfimagepath, medianename)
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
-	medianeData = medianeIm.getData().astype('float32')
-	xsize = medianeIm.getDim1()
-	ysize = medianeIm.getDim2()
+	medianeData = medianeIm.data.astype('float32')
+	xsize = medianeIm.shape[-1]
+	ysize = medianeIm.shape[-2]
 	
 	# Allocate space for mask
 	print("Allocating memory for mask")
@@ -196,7 +208,7 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
 		print("Reading " + imagename + " and creating corresponding mask")
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		data = im.getData().astype('float32')
+		data = im.data.astype('float32')
 		# Removing median image
 		data = data-medianeData
 		# Removing anything below 0
@@ -206,7 +218,10 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
 		oldmin = data.min()
 		# Resizing data, we do not need full resolution to find diamond spots!
 		# Better to work on low resolution, removed a lot of false positives
-		datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+		# datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+        # Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		datascale = numpy.array(PIL.Image.fromarray(data).resize((scale,scale),resample=PIL.Image.NEAREST))
 		max = datascale.max()
 		datascale = datascale*oldmax/max
 		meandata = datascale.mean()
@@ -283,16 +298,20 @@ def plotMask(edfimagepath, stem, first, last, mask, ndigits=4, extension='edf'):
 		print("Reading " + imagename + " and showing corresponding mask")
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		data = im.getData().astype('float32')
+		data = im.data.astype('float32')
 		mean = data.mean()
 		max = data.max()
 		min = data.min()
-		xsize = im.getDim1()
-		ysize = im.getDim2()
+		xsize = im.shape[-1]
+		ysize = im.shape[-2]
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
-		maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+		# maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+        # Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		# datascale = scipy.misc.imresize(data,(scale,scale),interp='nearest')
+		maskscaled = numpy.array(PIL.Image.fromarray(thismask).resize((xsize,ysize),resample=PIL.Image.NEAREST))
 		# Plotting data and mask
 		plt.title(image)                                   # set a title
 		p = plt.imshow(data, cmap='gray',origin='lower')          # plot the image
@@ -321,7 +340,7 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
 	imagename = os.path.join(edfimagepath, medianename)
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
-	medianeData = medianeIm.getData().astype('float32')
+	medianeData = medianeIm.data.astype('float32')
 	
 	# Loop on images and test median substraction
 	for i in range(first,last+1):
@@ -332,7 +351,7 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
 		print("Reading " + imagename + ", substracting median, and clearing data below mask")
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		data = im.getData().astype('float32')
+		data = im.data.astype('float32')
 		# Removing median image
 		data = data-medianeData
 		# Removing anything below 0
@@ -341,12 +360,15 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
 		median = numpy.median(data)
 		max = data.max()
 		min = data.min()
-		xsize = im.getDim1()
-		ysize = im.getDim2()
+		xsize = im.shape[-1]
+		ysize = im.shape[-2]
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
-		maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+		# maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest')
+		# Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		maskscaled = numpy.array(PIL.Image.fromarray(thismask).resize((xsize,ysize),resample=PIL.Image.NEAREST))
 		# Creating data under mask using linear interpolation or inpainting
 		# Need to create a list of points for which we have data
 		# Actually, gave up, fill with median value!
@@ -388,7 +410,7 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 	imagename = os.path.join(edfimagepath, medianename)
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
-	medianeData = medianeIm.getData().astype('float32')
+	medianeData = medianeIm.data.astype('float32')
 	
 	if (doinpaint):
 		print ("Filling mask with inpainting")
@@ -404,8 +426,8 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 		print("Reading and processing " + imagename)
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		data = im.getData().astype('float32')
-		header = im.getHeader()
+		data = im.data.astype('float32')
+		header = im.header
 		# Removing median image
 		data = data-medianeData
 		# Removing anything below 0
@@ -414,12 +436,14 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 		medianI = numpy.median(data)
 		maxI = data.max()
 		minI = data.min()
-		xsize = im.getDim1()
-		ysize = im.getDim2()
+		xsize = im.shape[-1]
+		ysize = im.shape[-2]
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
-		maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest',mode='F')
+		#maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='nearest',mode='F')		# Scipy.misc.imresize is deprecated
+		# Moving to a similar call using the PIL library
+		maskscaled = numpy.array(PIL.Image.fromarray(thismask).resize((xsize,ysize),resample=PIL.Image.NEAREST))
 		# Creating data under mask using linear interpolation or inpainting
 		# Need to create a list of points for which we have data
 		# Actually, gave up, fill with median value!
@@ -429,13 +453,19 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 			# We rescale the image and inpaint on a smaller version. Before reducing, remove extreme intensity values (it works better)
 			datacopy = data.copy()
 			datacopy = datacopy.clip(0., 10.*meanI)
-			datareduced = scipy.misc.imresize(datacopy,(thismask.shape[0],thismask.shape[1]),interp='nearest',mode='F')
+			#datareduced = scipy.misc.imresize(datacopy,(thismask.shape[0],thismask.shape[1]),interp='nearest',mode='F')
+			# Scipy.misc.imresize is deprecated
+			# Moving to a similar call using the PIL library
+			datareduced = numpy.array(PIL.Image.fromarray(datacopy).resize((thismask.shape[0],thismask.shape[1]),resample=PIL.Image.NEAREST))
 			# Setting mask data as NaN and call for inpainting. Parameters have been set from trial and error
 			idx2=(thismask>0)
 			datareduced[idx2] = numpy.NaN
 			result0 = inpaint.replace_nans(datareduced, max_iter=20, tol=1., kernel_radius=2, kernel_sigma=5, method='idw')
 			# Rescaling inpainted image and set new values at mask positions
-			result0 = scipy.misc.imresize(result0,(xsize,ysize),interp='nearest',mode='F')
+			# result0 = scipy.misc.imresize(result0,(xsize,ysize),interp='nearest',mode='F')
+			# Scipy.misc.imresize is deprecated
+			# Moving to a similar call using the PIL library
+			result0 = numpy.array(PIL.Image.fromarray(result0).resize((xsize,ysize),resample=PIL.Image.NEAREST))
 			data[idx] = result0[idx]
 		else:
 			# Fill maslwith median value!
@@ -445,8 +475,8 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 		print("Saving new EDF with median and mask removed in " + newname)
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		im.setData(data.astype('uint32'))
-		im.setHeader(header)
+		im.data = (data.astype('uint32'))
+		im.header = header
 		im.save(newname)
 
     

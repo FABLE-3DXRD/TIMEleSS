@@ -24,6 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 Original version, 31/May/2013
 """
 
+
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+
 # System functions, to manipulate command line arguments
 import sys
 import argparse
@@ -52,23 +57,23 @@ def averageImage(first,second,new):
 	new: new image name (full path, with extension)
 	"""
 	# Read image data from first image
-	print "Reading " + first
+	print("Reading " + first)
 	im1 = fabio.edfimage.edfimage()
 	im1.read(first)
 	# Read image data from second image
-	print "Reading " + second
+	print("Reading " + second)
 	im2 = fabio.edfimage.edfimage()
 	im2.read(second)
 	# Calculating average
-	data1 = im1.getData().astype('int32')
-	data2 = im2.getData().astype('int32')
+	data1 = im1.data.astype('int32')
+	data2 = im2.data.astype('int32')
 	datanew = (data1+data2)/2
 	# Removing data below 0
 	datanew = datanew.clip(min=0)
 	# Creating a header
-	header1 = im1.getHeader()
-	header2 = im2.getHeader()
-	headernew =  im1.getHeader().copy()
+	header1 = im1.header
+	header2 = im2.header
+	headernew =  im1.header.copy()
 	# headers are not always defined. We hence use a "try" loop so it does not crash
 	try:
 		if (header1['OmegaMin'] != ""):
@@ -99,10 +104,10 @@ def averageImage(first,second,new):
 	except KeyError:
 		omPos = None
 	# Saving new data
-	print "Saving new EDF with average data in " + new
+	print("Saving new EDF with average data in " + new)
 	im3 = fabio.edfimage.edfimage()
-	im3.setData(datanew.astype('uint32'))
-	im3.setHeader(headernew)
+	im3.data = datanew.astype('uint32')
+	im3.header = headernew
 	im3.save(new)
 	
 	
@@ -140,11 +145,11 @@ def main(argv):
 	
 	filename = files[0]
 	if (not(os.path.isfile(filename))):
-		print ("Error: file %s not found" % filename)
+		print(("Error: file %s not found" % filename))
 		sys.exit(2)
 	filename = files[1]
 	if (not(os.path.isfile(filename))):
-		print ("Error: file %s not found" % filename)
+		print(("Error: file %s not found" % filename))
 		sys.exit(2)
 	
 	# Perform the substraction

@@ -24,6 +24,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 # System functions, to manipulate command line arguments
 import sys
@@ -45,14 +48,14 @@ def extract_euler_angles(inputf,outputf):
 	file1 = inputf
 	grains1 = multigrainOutputParser.parseGrains(file1)
 	ngrains1 = len(grains1)
-	print "Parsed %s, found %d grains" % (file1, len(grains1))
+	print("Parsed %s, found %d grains" % (file1, len(grains1)))
 	
 	f = open(outputf,"w+")
 	for grain in grains1:
 		angles = grain.geteulerangles()
 		f.write("%.2f %.2f %.2f\n" % (angles[0], angles[1], angles[2]))
 	f.close()
-	print "Euler angles saved in %s" % (outputf)
+	print("Euler angles saved in %s" % (outputf))
 	return
 
 

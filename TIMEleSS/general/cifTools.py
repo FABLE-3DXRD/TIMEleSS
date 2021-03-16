@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 from xfab import tools,structure,sg
 from polyxsim import reflections
 import numpy
-
+from CifFile import ReadCif
 
 def open_cif(param,phase):
 	"""
@@ -47,6 +47,7 @@ def open_cif(param,phase):
 	Created: 12/2019, S. Merkel, Univ. Lille, France
 	"""
 	file = param['structure_phase_%i' %phase]
+	cf = ReadCif(file) # Generate an error if reading cif fails which is not always true below
 	struct = structure.build_atomlist()
 	struct.CIFread(ciffile=file)
 	param['sgno_phase_%i' %phase] = sg.sg(sgname=struct.atomlist.sgname).no

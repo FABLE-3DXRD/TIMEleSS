@@ -24,6 +24,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+
 # System functions, to manipulate command line arguments
 import sys
 import argparse
@@ -50,13 +54,13 @@ def test_grains(grainfile,gvefile,wavelength):
 	This can be used to make sure that this exact GVE file was actually used to index the grains
 	"""
 	grains = multigrainOutputParser.parseGrains(grainfile)
-	print "Parsed %s, found %d grains" % (grainfile, len(grains))
+	print ("Parsed %s, found %d grains" % (grainfile, len(grains)))
 	
 	# Load .gve file from ImageD11 :
 	[peaksgve,idlist,header] = multigrainOutputParser.parseGVE(gvefile) 
 	
 	# Try to see if all peaks in the indexed grains are in the gve
-	print "Making sure all indexed peak ID's are in the GVE file..."
+	print ("Making sure all indexed peak ID's are in the GVE file...")
 	npeakstotal = 0
 	npeakserror = 0
 	for grain in grains : 
@@ -68,18 +72,18 @@ def test_grains(grainfile,gvefile,wavelength):
 				ID_idlist = idlist.index(ID_grains)
 				ID_gve = peaksgve[ID_idlist]
 			except ValueError:
-				print "Peak %d of grain %s not found" % (ID_grains, grain.getName() )
+				print ("Peak %d of grain %s not found" % (ID_grains, grain.getName() ))
 				npeakserror += 1
 				if (npeakserror > 10):
-					print "Too many errors, I stop here"
+					print ("Too many errors, I stop here")
 					return
 	
-	print "I was looking for %d peaks from %d grains and got %d errors" % (npeakstotal, len(grains), npeakserror)
+	print ("I was looking for %d peaks from %d grains and got %d errors" % (npeakstotal, len(grains), npeakserror))
 	if (npeakserror > 0):
-		print "%s and %s do not seem to match" % (grainfile, gvefile)
+		print ("%s and %s do not seem to match" % (grainfile, gvefile))
 		return
 	
-	print "All peaks in the grain file are in the GVE file. Now, looking for 2theta, eta, omega to see if they match..."
+	print ("All peaks in the grain file are in the GVE file. Now, looking for 2theta, eta, omega to see if they match...")
 	for grain in grains : 
 		peaks = grain.peaks
 		for indexedPeak in peaks : 
@@ -97,20 +101,20 @@ def test_grains(grainfile,gvefile,wavelength):
 			etaPeak = normalizedAngle(float(peaksgve[ID_idlist]['eta']))
 			omegaPeak = normalizedAngle(float(peaksgve[ID_idlist]['omega']))
 			if ((abs(etaG-etaPeak) > 0.01) or (abs(omegaPeak-omegaG) > 0.01) or (abs(dsG-dsPeak) > 0.001)):
-				print "Problem with peak %d of grain %s not found" % (ID_grains, grain.getName() )
-				print "Expected: eta = %.2f , omega = %.2f, ds = %.4f" % (etaG, omegaG, dsG)
-				print "Found: eta = %.2f , omega = %.2f, ds = %.4f" % (etaPeak, omegaPeak, dsPeak)
-				print "Differences: eta = %.4f , omega = %.4f, ds = %.6f" % (abs(etaPeak-etaG), abs(omegaPeak-omegaG), abs(dsG-dsPeak))
+				print ("Problem with peak %d of grain %s not found" % (ID_grains, grain.getName() ))
+				print ("Expected: eta = %.2f , omega = %.2f, ds = %.4f" % (etaG, omegaG, dsG))
+				print ("Found: eta = %.2f , omega = %.2f, ds = %.4f" % (etaPeak, omegaPeak, dsPeak))
+				print ("Differences: eta = %.4f , omega = %.4f, ds = %.6f" % (abs(etaPeak-etaG), abs(omegaPeak-omegaG), abs(dsG-dsPeak)))
 				npeakserror += 1
 				if (npeakserror > 10):
-					print "Too many errors, I stop here"
+					print ("Too many errors, I stop here")
 					return
 
 	if (npeakserror > 0):
-		print "%s and %s do not seem to match" % (grainfile, gvefile)
+		print ("%s and %s do not seem to match" % (grainfile, gvefile))
 		return
 	
-	print "All peaks in the grain file are in the GVE file and angles fully match."
+	print ("All peaks in the grain file are in the GVE file and angles fully match.")
 	
 	return
 

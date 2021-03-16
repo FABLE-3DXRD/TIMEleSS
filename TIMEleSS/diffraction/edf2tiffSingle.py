@@ -23,6 +23,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
 
 # System functions, to manipulate command line arguments
 import sys
@@ -42,7 +46,7 @@ def edfToTiff(edffilename):
 	basename, file_extension = os.path.splitext(edffilename)
 	tiffilename = basename + ".tif"
 	if (not(os.path.isfile(edffilename))):
-		print ("Error: file %s not found" % fedf)
+		print(("Error: file %s not found" % fedf))
 		sys.exit(2)
 	# Open the EDF image file
 	imedf = fabio.open(edffilename)
@@ -50,7 +54,7 @@ def edfToTiff(edffilename):
 	imtiff = fabio.tifimage.tifimage(imedf.data,imedf.header)
 	# Save to tiff
 	imtiff.write(tiffilename)
-	print "Data saved in %s" % (tiffilename)
+	print("Data saved in %s" % (tiffilename))
 
 
 #################################################################

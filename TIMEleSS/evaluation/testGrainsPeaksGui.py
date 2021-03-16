@@ -23,14 +23,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
-# System functions, to manipulate command line arguments
+# System functions, to manipulate command line argumentsi
 import sys
 import argparse
 import os.path
 
 # Actual grain testing functions
-import testGrainsPeaks
+from . import testGrainsPeaks
 
 # Plotting routines
 import matplotlib

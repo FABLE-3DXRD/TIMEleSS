@@ -19,13 +19,18 @@ Installation instructions
 
 To use the TIMEleSS tools, try this:
 
-1- Download and install python
-2- Add the packages: numpy, scipy, matplotlib, and pyqt5
-3- Add the xfab and ImageD11 packages from the FABLE-3DXRD project at https://github.com/FABLE-3DXRD 
+1- Download and install python (version 3, minimum. Python 2 support stopped in March 2021)
+2- Add the packages: numpy, scipy, matplotlib, pyqt5, PIL, 
+3- Add fabio, https://github.com/silx-kit/fabio
+3- Add the xfab, ImageD11, polyxsim packages from the FABLE-3DXRD project at https://github.com/FABLE-3DXRD 
 4- Then try: python setup.py build
 5- Followed by: python setup.py install
 
-After installation, you should find the various TIMEleSS scripts, somewhere in your path.
+You may be asked to run python3 instead of python2. In this case, steps 4 and 5 become
+4- Then try: python3 setup.py build
+5- Followed by: python3 setup.py install
+
+After installation, you should find the various TIMEleSS scripts, somewhere in your path. They all start with the word 'timeless'. Type 'timeless' followed by Tab key in a terminal and you will get the list.
 
 Good luck!
 

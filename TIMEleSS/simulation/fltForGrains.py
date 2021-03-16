@@ -23,6 +23,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 # System functions, to manipulate command line arguments
 import sys
@@ -34,27 +37,27 @@ from TIMEleSS.general import multigrainOutputParser
 def fltGrains(gsfile, oldFLT, newFLT, saveall, verbose=False):
 
 	grains = multigrainOutputParser.parse_GrainSpotter_log(gsfile)
-	print "Parsed grains from %s" % gsfile
-	print "Number of grains: %d" % len(grains)
+	print("Parsed grains from %s" % gsfile)
+	print("Number of grains: %d" % len(grains))
 	
 	[peaksflt,idlist,header] = multigrainOutputParser.parseFLT(oldFLT)
 
-	print "Detecting peaks which have been assigned to grains in %s" % gsfile
+	print("Detecting peaks which have been assigned to grains in %s" % gsfile)
 	basename, file_extension = os.path.splitext(newFLT)
 
 	newpeaksflt = []
 	for grain in grains:
 		peaksgrain = []
 		if (verbose):
-			print "Looking at grain %s" % grain.getName()
+			print("Looking at grain %s" % grain.getName())
 		peaks = grain.getPeaks()
 		for peak in peaks:
 			if (verbose):
-				print "Trying to get info for peak %d from the list of peaks" % peak.getPeakID()
+				print("Trying to get info for peak %d from the list of peaks" % peak.getPeakID())
 			try:
 				index = idlist.index(peak.getPeakID())
 			except IndexError:
-				print "Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName())
+				print("Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName()))
 				return
 			newpeaksflt.append(peaksflt[index])
 			peaksgrain.append(peaksflt[index])

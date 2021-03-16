@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
 
 """
 This is part of the TIMEleSS tools
@@ -54,24 +57,24 @@ def createEmptyImage(startfile, newname, omega=None):
 	"""
 
 	# Read starting image
-	print "Reading data from " + startfile
+	print("Reading data from " + startfile)
 	startIm = fabio.edfimage.edfimage()
 	startIm.read(startfile)
-	startdata = startIm.getData().astype('float32')
+	startdata = startIm.data.astype('float32')
 	oldmean = startdata.mean()
 	oldmax = startdata.max()
 	oldmin = startdata.min()
-	header = startIm.getHeader()
+	header = startIm.header
 	# Removing median image from itself
 	darkdata = startdata-startdata
 	# Setting a new value for Omega, if needed
 	if (omega != None):
 		header['Omega'] = "%.3f" % omega
 	# Save new data
-	print "Saving empty image in " + newname
+	print("Saving empty image in " + newname)
 	im = fabio.edfimage.edfimage()
-	im.setData(darkdata.astype('uint32'))
-	im.setHeader(header)
+	im.data = darkdata.astype('uint32')
+	im.header = header
 	im.save(newname)
     
 #################################################################

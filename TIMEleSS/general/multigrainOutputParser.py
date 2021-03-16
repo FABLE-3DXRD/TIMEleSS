@@ -128,16 +128,15 @@ def parse_GrainSpotter_log(logfile,stoponerror=True):
 		GrainNumW=a[1][:-1]
 		GrainNum=int(GrainNumW)
 		if (numbpeaks < 1):
-			print "Warning!!!\nGrain %d in %s has only %d peaks!" % (GrainNum, logfile, numbpeaks)
-			print "Something is very wrong with your grain spotter output file"
+			print ("Warning!!!\nGrain %d in %s has only %d peaks!" % (GrainNum, logfile, numbpeaks))
+			print ("Something is very wrong with your grain spotter output file")
 			if (stoponerror):
-				print "I stop here...\n"
+				print ("I stop here...\n")
 				sys.exit(0)
 			else: # Skip grain
-				print "Skip this grain...\n"
+				print ("Skip this grain...\n")
 				continue
 			
-		#print GrainNum, a[1]
 		grain = grain3DXRD.Grain()
 		grain.setFileName(logfile)
 		grain.setNPeaks(numbpeaks)
@@ -160,10 +159,10 @@ def parse_GrainSpotter_log(logfile,stoponerror=True):
 			UBI[0,i] = float(line1[i])
 			UBI[1,i] = float(line2[i])
 			UBI[2,i] = float(line3[i])
-		#print "UBI = ", UBI
-		#print "BI = ", scipy.dot(UBI,U)
+		#print ("UBI = ", UBI)
+		#print ("BI = ", scipy.dot(UBI,U))
 		B =scipy.linalg.inv(scipy.dot(UBI,U))
-		#print "B = ", B
+		#print ("B = ", B)
 		# Setting information
 		grain.setUBBi(U,B,UBI)
 		# extracting the Euler angles phi1 phi phi2
@@ -393,11 +392,21 @@ def parseFLT(fname):
 	idlist = []
 	# Read file
 	f = open(fname, 'r')
-	# Dealing with header, so we know what we are reading
 	lines = f.readlines()
-	header = lines[0]
+	f.close()
+	# Dealing with header, so we know what we are reading
+	# Header is the last line with a pound symbol
+	headerline = -1
+	for line in lines:
+		li=line.strip()
+		if not li.startswith("#"):
+			break
+		else:
+			headerline += 1
+	header = lines[headerline]
 	stringlist = header.split()
 	del stringlist[0]
+	# print ("stringlist is", stringlist)
 	# Reading peak information
 	for line in lines:
 		li=line.strip()
@@ -409,7 +418,6 @@ def parseFLT(fname):
 			thisid = int(peak["spot3d_id"])
 			idlist.append(thisid)
 			peaks.append(peak)
-	f.close()
 	print ("Parsed list of peaks from flt file %s, found %i peaks" % ( fname, len(peaks)))
 	return [peaks,idlist,header]
 
