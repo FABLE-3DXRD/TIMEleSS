@@ -19,7 +19,7 @@ Installation instructions
 
 To use the TIMEleSS tools, try this:
 
-1- Download and install python (version 3, minimum. Version 2 support stopped in March 2021)
+1- Download and install python (version 3, minimum. Python 2 support stopped in March 2021)
 2- Add the packages: numpy, scipy, matplotlib, pyqt5, PIL, 
 3- Add fabio, https://github.com/silx-kit/fabio
 3- Add the xfab, ImageD11, polyxsim packages from the FABLE-3DXRD project at https://github.com/FABLE-3DXRD 
