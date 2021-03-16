@@ -86,7 +86,7 @@ def meanFileSeries(stem,first,last,digits,ext,new,tif):
 	# calculating mean
 	data = data / (last-first+1)
 	# Preparing a header
-	headernew =  imedf.getHeader().copy()
+	headernew =  imedf.header.copy()
 	# headers are not always defined. We hence use a "try" loop so it does not crash
 	try:
 		if (headernew['OmegaMin'] != ""):
@@ -116,8 +116,8 @@ def meanFileSeries(stem,first,last,digits,ext,new,tif):
 		print("Mean image saved in " + new)
 	else:
 		im3 = fabio.edfimage.edfimage()
-		im3.setData(newdata)
-		im3.setHeader(headernew)
+		im3.data = newdata
+		im3.header = headernew
 		im3.save(new)
 		print("Mean image saved in " + new)
 		
