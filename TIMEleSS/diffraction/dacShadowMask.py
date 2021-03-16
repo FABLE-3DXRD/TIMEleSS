@@ -31,17 +31,24 @@ from six.moves import range
 import sys
 import argparse
 import os.path
+
 # string module contains a number of functions that are useful for manipulating strings
 import string
+
 # Mathematical stuff (for data array)
 import numpy
 import scipy
 import scipy.ndimage
 import scipy.ndimage.filters
 import scipy.ndimage.morphology
+
+# Image manipulation library
+import PIL.Image
+
 # Fabio, from ESRF fable package
 import fabio
 import fabio.edfimage
+
 # Plotting library
 import matplotlib
 matplotlib.use('TkAgg')
@@ -88,7 +95,10 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     median = numpy.median(data)
     # Resizing data
     print("Rescaling to %dx%d..." % (scale,scale))
-    datascale = scipy.misc.imresize(datacut,(scale,scale),interp='bicubic')
+    # datascale = scipy.misc.imresize(datacut,(scale,scale),interp='bicubic')
+    # Scipy.misc.imresize is deprecated
+    # Moving to a similar call using the PIL library
+    datascale = numpy.array(PIL.Image.fromarray(datacut).resize((scale,scale),resample=PIL.Image.BICUBIC))
     max = datascale.max()
     datascale = datascale*oldmax/max
     meandata = datascale.mean()
@@ -123,7 +133,10 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
            thismask = numpy.multiply(thismask,maskonmask)
     print("Mask is ready")
     # Preparing mask
-    maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='bicubic')
+    # maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='bicubic')
+    # Scipy.misc.imresize is deprecated
+    # Moving to a similar call using the PIL library
+    maskscaled = numpy.array(PIL.Image.fromarray(thismask).resize((xsize,ysize),resample=PIL.Image.BICUBIC))
     # Creating data under mask using linear interpolation or inpainting
     # Need to create a list of points for which we have data
     # Actually, gave up, fill with median value!
