@@ -65,15 +65,15 @@ def averageImage(first,second,new):
 	im2 = fabio.edfimage.edfimage()
 	im2.read(second)
 	# Calculating average
-	data1 = im1.getData().astype('int32')
-	data2 = im2.getData().astype('int32')
+	data1 = im1.data.astype('int32')
+	data2 = im2.data.astype('int32')
 	datanew = (data1+data2)/2
 	# Removing data below 0
 	datanew = datanew.clip(min=0)
 	# Creating a header
-	header1 = im1.getHeader()
-	header2 = im2.getHeader()
-	headernew =  im1.getHeader().copy()
+	header1 = im1.header
+	header2 = im2.header
+	headernew =  im1.header.copy()
 	# headers are not always defined. We hence use a "try" loop so it does not crash
 	try:
 		if (header1['OmegaMin'] != ""):
@@ -106,8 +106,8 @@ def averageImage(first,second,new):
 	# Saving new data
 	print("Saving new EDF with average data in " + new)
 	im3 = fabio.edfimage.edfimage()
-	im3.setData(datanew.astype('uint32'))
-	im3.setHeader(headernew)
+	im3.data = datanew.astype('uint32')
+	im3.header = headernew
 	im3.save(new)
 	
 	
