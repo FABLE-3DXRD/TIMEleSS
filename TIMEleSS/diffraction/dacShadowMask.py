@@ -70,13 +70,13 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     print("Reading and processing " + imagename)
     im = fabio.edfimage.edfimage()
     im.read(imagename)
-    data = im.getData().astype('float32')
-    header = im.getHeader()
+    data = im.data.astype('float32')
+    header = im.header
     oldmean = data.mean()
     oldmax = data.max()
     oldmin = data.min()
-    xsize = im.getDim1()
-    ysize = im.getDim2()
+    xsize = im.shape[-1]
+    ysize = im.shape[-2]
     # Plot the image
     plt.title(image)
     p = plt.imshow(data,origin='lower')
@@ -140,8 +140,8 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     print("Saving new EDF with median and mask removed in " + newname)
     im = fabio.edfimage.edfimage()
     im.read(imagename)
-    im.setData(data.astype('uint32'))
-    im.setHeader(header)
+    im.data = data.astype('uint32')
+    im.header = header
     im.save(newname)
 
 ##########################################################################################################
