@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from six.moves import range
 
 """
 This is part of the TIMEleSS tools
@@ -38,11 +43,6 @@ Original version in TIMEleSS tools, 3/Sep/2019
 # Cython removed and Gaussian kernel code added by opit (https://github.com/astrolitterbox)
 # Note that the Gaussian kernel has a default standard deviation equal to 3 and is normalised to sum up to 1 to preserve flux, which means that for larger standard deviation you'd have to increase the kernel size to avoid artifacts.
 
-# Python 2 to python 3 migration tools
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from six.moves import range
 
 
 import numpy as np
