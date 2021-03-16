@@ -23,6 +23,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
 
 # System functions, to manipulate command line arguments
 import sys
@@ -55,9 +59,9 @@ def tiffToEdf(tiffimagepath, edfimagepath, stem, extension, fromm, to, step, fir
 		n = first + i
 		ifile = formatfilename % (stem, n, extension)
 		ftiff = imagename = os.path.join(tiffimagepath, ifile)
-		print "Convertion %s at omega=%.3f" % (ftiff, omega)
+		print("Convertion %s at omega=%.3f" % (ftiff, omega))
 		if (not(os.path.isfile(ftiff))):
-			print ("Error: file %s not found" % ftiff)
+			print(("Error: file %s not found" % ftiff))
 			sys.exit(2)
 		# Open the tiff image file
 		im100 = fabio.open(ftiff)
@@ -70,11 +74,11 @@ def tiffToEdf(tiffimagepath, edfimagepath, stem, extension, fromm, to, step, fir
 		ifile = formatfileedf % (edfstem, n)
 		fedf = os.path.join(edfimagepath, ifile)
 		edfimage.write(fedf)
-		print "Data saved in %s" % (ifile)
+		print("Data saved in %s" % (ifile))
 		totalsize += im100.data.nbytes
 		ndata += 1
-	print "Created ", ndata, " EDF files"
-	print "Total size: ", totalsize/1048576., " megabytes, ", totalsize/(1073741824.), " gigabytes"
+	print("Created ", ndata, " EDF files")
+	print("Total size: ", totalsize/1048576., " megabytes, ", totalsize/(1073741824.), " gigabytes")
 
 
 
