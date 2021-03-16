@@ -30,7 +30,7 @@ You may be asked to run python3 instead of python2. In this case, steps 4 and 5 
 4- Then try: python3 setup.py build
 5- Followed by: python3 setup.py install
 
-After installation, you should find the various TIMEleSS scripts, somewhere in your path. They all start with the word 'timeless'. Type 'timeless' followed by Tab in a terminal and you will get the list.
+After installation, you should find the various TIMEleSS scripts, somewhere in your path. They all start with the word 'timeless'. Type 'timeless' followed by Tab key in a terminal and you will get the list.
 
 Good luck!
 
