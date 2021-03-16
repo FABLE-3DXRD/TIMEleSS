@@ -28,6 +28,10 @@ Functions to create an empty EDF image
     Simply substract the median from itself
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+
 # System functions, to manipulate command line arguments
 import sys
 import argparse
@@ -54,7 +58,7 @@ def createEmptyImage(startfile, newname, omega=None):
 	"""
 
 	# Read starting image
-	print "Reading data from " + startfile
+	print("Reading data from " + startfile)
 	startIm = fabio.edfimage.edfimage()
 	startIm.read(startfile)
 	startdata = startIm.getData().astype('float32')
@@ -68,7 +72,7 @@ def createEmptyImage(startfile, newname, omega=None):
 	if (omega != None):
 		header['Omega'] = "%.3f" % omega
 	# Save new data
-	print "Saving empty image in " + newname
+	print("Saving empty image in " + newname)
 	im = fabio.edfimage.edfimage()
 	im.setData(darkdata.astype('uint32'))
 	im.setHeader(header)
