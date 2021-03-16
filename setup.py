@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 
 """
@@ -22,13 +22,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-
+# Python 2 to python 3 migration tools
 from __future__ import absolute_import
+
 #from distutils.core import setup,Extension
 from setuptools import setup,Extension
 import sys
 
 from distutils import util
+
+if sys.version_info < (3,0):
+    sys.exit('Sorry, Python 2 is not supported. This should be run in python3 or later')
 
 pathMySubPackage1 = util.convert_path('TIMEleSS/general')
 pathMySubPackage2 = util.convert_path('TIMEleSS/simulation')
@@ -37,14 +41,15 @@ pathMySubPackage4 = util.convert_path('TIMEleSS/evaluation')
     
 setup(
 	name='TIMEleSS',
+	python_requires='>3.0.0',
 	version='0.0.1',
 	description='Multigrain crystallography toolbox from the TIMEleSS project',
 	license='GPL', 
 	maintainer='Sebastien Merkel',
 	maintainer_email='sebastien.merkel@univ-lille.fr',
 	project_urls={
-    'Documentation': 'to be defined',
-    'Source': 'to be defined',
+    'Documentation': 'http://multigrain.texture.rocks/',
+    'Source': 'https://github.com/FABLE-3DXRD/TIMEleSS',
     'Science project': 'http://timeless.texure.rocks',
 	},
 	
