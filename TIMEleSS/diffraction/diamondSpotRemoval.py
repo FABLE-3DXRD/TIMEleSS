@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
 from __future__ import print_function # To make print statements compatible with python3
 from six.moves import range
+
 
 """
 This is part of the TIMEleSS tools
@@ -25,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
 
+
 """
 Functions to remove diamond spots from a 3D-XRD images
  - test of various filter options
@@ -33,8 +37,7 @@ Functions to remove diamond spots from a 3D-XRD images
 Original version, 6/Jul/2012
 """
 
-# Python 2 to python 3 migration tools
-from __future__ import absolute_import
+
 
 # System functions, to manipulate command line arguments
 import sys
@@ -87,9 +90,9 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
 	imagename = os.path.join(edfimagepath, medianename)
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
-	print("Dimensions of median image: ", medianeIm.getDims())
-	medianeData = medianeIm.getData().astype('float32')
-	print("Dimensions of median image: ", medianeIm.getDims())
+	print("Dimensions of median image: ", medianeIm.shape)
+	medianeData = medianeIm.data.astype('float32')
+	print("Dimensions of median image: ", medianeIm.shape)
 	print("Median info: ", medianeData.min(),  medianeData.max(), medianeData.mean())
 	
 	# Loop on images and test median substraction
@@ -101,8 +104,8 @@ def testSpotDetection(edfimagepath, stem, first, last, medianename, ndigits=4, e
 		print("Reading " + imagename)
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		print("Dimensions: ", im.getDims())
-		data = im.getData().astype('float32')
+		print("Dimensions: ", im.shape)
+		data = im.data.astype('float32')
 		print("Image info (min, max, mean): ", data.min(),  data.max(), data.mean())
 		print("Substraction median...")
 		# Removing median image
@@ -181,7 +184,7 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
 	imagename = os.path.join(edfimagepath, medianename)
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
-	medianeData = medianeIm.getData().astype('float32')
+	medianeData = medianeIm.data.astype('float32')
 	xsize = medianeIm.getDim1()
 	ysize = medianeIm.getDim2()
 	
@@ -199,7 +202,7 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
 		print("Reading " + imagename + " and creating corresponding mask")
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		data = im.getData().astype('float32')
+		data = im.data.astype('float32')
 		# Removing median image
 		data = data-medianeData
 		# Removing anything below 0
@@ -286,7 +289,7 @@ def plotMask(edfimagepath, stem, first, last, mask, ndigits=4, extension='edf'):
 		print("Reading " + imagename + " and showing corresponding mask")
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		data = im.getData().astype('float32')
+		data = im.data.astype('float32')
 		mean = data.mean()
 		max = data.max()
 		min = data.min()
@@ -324,7 +327,7 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
 	imagename = os.path.join(edfimagepath, medianename)
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
-	medianeData = medianeIm.getData().astype('float32')
+	medianeData = medianeIm.data.astype('float32')
 	
 	# Loop on images and test median substraction
 	for i in range(first,last+1):
@@ -335,7 +338,7 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
 		print("Reading " + imagename + ", substracting median, and clearing data below mask")
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		data = im.getData().astype('float32')
+		data = im.data.astype('float32')
 		# Removing median image
 		data = data-medianeData
 		# Removing anything below 0
@@ -391,7 +394,7 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 	imagename = os.path.join(edfimagepath, medianename)
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
-	medianeData = medianeIm.getData().astype('float32')
+	medianeData = medianeIm.data.astype('float32')
 	
 	if (doinpaint):
 		print ("Filling mask with inpainting")
@@ -407,7 +410,7 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 		print("Reading and processing " + imagename)
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		data = im.getData().astype('float32')
+		data = im.data.astype('float32')
 		header = im.getHeader()
 		# Removing median image
 		data = data-medianeData
