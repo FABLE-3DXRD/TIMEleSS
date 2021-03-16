@@ -23,6 +23,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
+
 
 # System functions, to manipulate command line arguments
 import sys
@@ -54,7 +59,7 @@ def edfToTiffFileSeries(tiffimagepath, edfimagepath, stem, fromm, to,digits,doun
 		ifile = formatfileedf % (edfstem, i)
 		fedf = os.path.join(edfimagepath, ifile)
 		if (not(os.path.isfile(fedf))):
-			print ("Error: file %s not found" % fedf)
+			print(("Error: file %s not found" % fedf))
 			sys.exit(2)
 		# Open the EDF image file
 		imedf = fabio.open(fedf)
@@ -64,11 +69,11 @@ def edfToTiffFileSeries(tiffimagepath, edfimagepath, stem, fromm, to,digits,doun
 		ifile = formatfiletif % (tifstem, i)
 		ftif = os.path.join(tiffimagepath, ifile)
 		imtiff.write(ftif)
-		print "Data saved in %s" % (ifile)
+		print("Data saved in %s" % (ifile))
 		totalsize += imedf.data.nbytes
 		ndata += 1
-	print "Created ", ndata, " TIF files"
-	print "Total size: ", totalsize/1048576., " megabytes, ", totalsize/(1073741824.), " gigabytes"
+	print("Created ", ndata, " TIF files")
+	print("Total size: ", totalsize/1048576., " megabytes, ", totalsize/(1073741824.), " gigabytes")
 
 
 
