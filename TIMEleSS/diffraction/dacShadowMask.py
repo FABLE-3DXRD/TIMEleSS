@@ -99,7 +99,7 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     datascale2 = scipy.ndimage.filters.median_filter(datascale,size=filtersize)
     max = datascale2.max()
     if (max > 0):
-	datascale2 = datascale2*oldmax/max
+        datascale2 = datascale2*oldmax/max
     min = datascale2.min()
     max = datascale2.max()
     mean = datascale2.mean()
@@ -115,12 +115,12 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
       print("Removing portion of mask within the central radius")
       maskonmask = numpy.ones((scale,scale),dtype=numpy.int8)
       for i in range(0,scale):
-	  for j in range(0,scale):
-	      d = numpy.sqrt((j-c_rawy)*(j-c_rawy)+(i-c_rawz)*(i-c_rawz))
-	      if (d<radius):
-		  maskonmask[i,j] = 0
+          for j in range(0,scale):
+            d = numpy.sqrt((j-c_rawy)*(j-c_rawy)+(i-c_rawz)*(i-c_rawz))
+            if (d<radius):
+               maskonmask[i,j] = 0
       for i in range(first,last+1):
-	thismask = numpy.multiply(thismask,maskonmask)
+           thismask = numpy.multiply(thismask,maskonmask)
     print("Mask is ready")
     # Preparing mask
     maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='bicubic')
