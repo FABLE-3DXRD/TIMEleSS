@@ -24,6 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 Original version, 31/May/2013
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
+
 # System functions, to manipulate command line arguments
 import sys
 import argparse
@@ -59,9 +64,9 @@ def meanFileSeries(stem,first,last,digits,ext,new,tif):
 	
 	# Opening the first file and creating arrays
 	ifile = formatfileedf % (stem, first)
-	print "Reading " + ifile
+	print("Reading " + ifile)
 	if (not(os.path.isfile(ifile))):
-		print ("Error: file %s not found" % ifile)
+		print(("Error: file %s not found" % ifile))
 		sys.exit(2)
 	# Open the EDF image file
 	imedf = fabio.open(ifile)
@@ -70,9 +75,9 @@ def meanFileSeries(stem,first,last,digits,ext,new,tif):
 	# Read the rest
 	for i in range(first+1,last+1):
 		ifile = formatfileedf % (stem, i)
-		print "Reading " + ifile
+		print("Reading " + ifile)
 		if (not(os.path.isfile(ifile))):
-			print ("Error: file %s not found" % ifile)
+			print(("Error: file %s not found" % ifile))
 			sys.exit(2)
 		# Open the EDF image file
 		imedf = fabio.open(ifile)
@@ -108,13 +113,13 @@ def meanFileSeries(stem,first,last,digits,ext,new,tif):
 	if (tif):
 		imtiff = fabio.tifimage.tifimage(newdata,headernew)
 		imtiff.save(new)
-		print "Mean image saved in " + new
+		print("Mean image saved in " + new)
 	else:
 		im3 = fabio.edfimage.edfimage()
 		im3.setData(newdata)
 		im3.setHeader(headernew)
 		im3.save(new)
-		print "Mean image saved in " + new
+		print("Mean image saved in " + new)
 		
 	return
 	
