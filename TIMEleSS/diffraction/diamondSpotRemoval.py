@@ -191,8 +191,8 @@ def createMask(edfimagepath, stem, first, last, medianename, ndigits=4, extensio
 	medianeIm = fabio.edfimage.edfimage()
 	medianeIm.read(imagename)
 	medianeData = medianeIm.data.astype('float32')
-	xsize = medianeIm.getDim1()
-	ysize = medianeIm.getDim2()
+	xsize = medianeIm.shape[-1]
+	ysize = medianeIm.shape[-2]
 	
 	# Allocate space for mask
 	print("Allocating memory for mask")
@@ -302,8 +302,8 @@ def plotMask(edfimagepath, stem, first, last, mask, ndigits=4, extension='edf'):
 		mean = data.mean()
 		max = data.max()
 		min = data.min()
-		xsize = im.getDim1()
-		ysize = im.getDim2()
+		xsize = im.shape[-1]
+		ysize = im.shape[-2]
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
@@ -360,8 +360,8 @@ def testClearMask(edfimagepath, stem, first, last, medianename, mask, ndigits=4,
 		median = numpy.median(data)
 		max = data.max()
 		min = data.min()
-		xsize = im.getDim1()
-		ysize = im.getDim2()
+		xsize = im.shape[-1]
+		ysize = im.shape[-2]
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
@@ -427,7 +427,7 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
 		data = im.data.astype('float32')
-		header = im.getHeader()
+		header = im.header
 		# Removing median image
 		data = data-medianeData
 		# Removing anything below 0
@@ -436,8 +436,8 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 		medianI = numpy.median(data)
 		maxI = data.max()
 		minI = data.min()
-		xsize = im.getDim1()
-		ysize = im.getDim2()
+		xsize = im.shape[-1]
+		ysize = im.shape[-2]
 		# Preparing mask
 		thismask = mask[i-first]
 		thismask = thismask.astype(numpy.float32) # New versions of python do not like resizing with integer...
@@ -475,8 +475,8 @@ def saveDataClearMask(edfimagepath, newpath, stem, first, last, medianename, mas
 		print("Saving new EDF with median and mask removed in " + newname)
 		im = fabio.edfimage.edfimage()
 		im.read(imagename)
-		im.setData(data.astype('uint32'))
-		im.setHeader(header)
+		im.data = (data.astype('uint32'))
+		im.header = header
 		im.save(newname)
 
     
