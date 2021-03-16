@@ -22,6 +22,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
 
 # System functions, to manipulate command line arguments
 import sys
@@ -50,10 +54,10 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
   
 
   if ((not (os.path.isdir(newpath))) or (not (os.path.exists(newpath)))) :
-      print "ERROR! %s is not a directory or does not exist.\nAborting." % newpath
+      print("ERROR! %s is not a directory or does not exist.\nAborting." % newpath)
       return
   if (os.path.samefile(edfimagepath, newpath)):
-      print "ERROR!\nImages are read from %s.\nNew EDF should be saved in %s.\nThis will destroy the original data.\nAborting" % (edfimagepath, newpath)
+      print("ERROR!\nImages are read from %s.\nNew EDF should be saved in %s.\nThis will destroy the original data.\nAborting" % (edfimagepath, newpath))
       return
      
   #c_rawy = c_rawy*scale/2048
@@ -63,7 +67,7 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     format = "%s%0" + str(ndigits) + "d." + extension
     image = format % (stem,i)
     imagename = os.path.join(edfimagepath, image)
-    print "Reading and processing " + imagename
+    print("Reading and processing " + imagename)
     im = fabio.edfimage.edfimage()
     im.read(imagename)
     data = im.getData().astype('float32')
@@ -83,7 +87,7 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     datacut = data.clip(max=2*oldmean)
     median = numpy.median(data)
     # Resizing data
-    print "Rescaling to %dx%d..." % (scale,scale)
+    print("Rescaling to %dx%d..." % (scale,scale))
     datascale = scipy.misc.imresize(datacut,(scale,scale),interp='bicubic')
     max = datascale.max()
     datascale = datascale*oldmax/max
@@ -91,7 +95,7 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     mindata = datascale.min()
     maxdata = datascale.max()
     # Applying a median filter
-    print "Applying %d pixels median filter" % (filtersize)
+    print("Applying %d pixels median filter" % (filtersize))
     datascale2 = scipy.ndimage.filters.median_filter(datascale,size=filtersize)
     max = datascale2.max()
     if (max > 0):
@@ -108,7 +112,7 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     thismask =  scipy.ndimage.binary_closing(thismask)
     # Clearing central disk
     if (radius != None):
-      print "Removing portion of mask within the central radius"
+      print("Removing portion of mask within the central radius")
       maskonmask = numpy.ones((scale,scale),dtype=numpy.int8)
       for i in range(0,scale):
 	  for j in range(0,scale):
@@ -117,7 +121,7 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
 		  maskonmask[i,j] = 0
       for i in range(first,last+1):
 	thismask = numpy.multiply(thismask,maskonmask)
-    print "Mask is ready"
+    print("Mask is ready")
     # Preparing mask
     maskscaled = scipy.misc.imresize(thismask,(xsize,ysize),interp='bicubic')
     # Creating data under mask using linear interpolation or inpainting
@@ -133,7 +137,7 @@ def dacShadowMask(edfimagepath, newpath, stem, first, last, ndigits=4, extension
     plt.clf()
     # Save new data
     newname = os.path.join(newpath, image)
-    print "Saving new EDF with median and mask removed in " + newname
+    print("Saving new EDF with median and mask removed in " + newname)
     im = fabio.edfimage.edfimage()
     im.read(imagename)
     im.setData(data.astype('uint32'))
@@ -157,8 +161,8 @@ def main(argv):
 	Main subroutine
 	"""
 	
-	print "Dealing with shadows in 3D-XRD in the DAC"
-	print "This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n"
+	print("Dealing with shadows in 3D-XRD in the DAC")
+	print("This is part of the TIMEleSS project\nhttp://timeless.texture.rocks\n")
 	
 	desc="""
 
@@ -222,7 +226,7 @@ Complex example:
 	error = False
 	if (radius != None):
 		if ((c_rawy == None) or (c_rawz == None)):
-			print "ERROR: beam center position need if you want to define a radius"
+			print("ERROR: beam center position need if you want to define a radius")
 			error = True
 	
 	if (error):
