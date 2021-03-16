@@ -19,6 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 Original version, 31/May/2013
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
+
 # System functions, to manipulate command line arguments
 import sys
 import argparse
@@ -60,9 +65,9 @@ def flatFieldFileSeries(stem,first,last,blank,digits,ext,new,tif,scaling,damping
 	for i in range(first,last+1):
 		#Load the blank image
 		ibfile = formatfileblank % (blank, i)
-		print "Reading " + ibfile
+		print("Reading " + ibfile)
 		if (not(os.path.isfile(ibfile))):
-			print ("Error: file %s not found" % ibfile)
+			print(("Error: file %s not found" % ibfile))
 			sys.exit(2)
 		#open the blank image
 		imblank = fabio.open(ibfile)
@@ -73,9 +78,9 @@ def flatFieldFileSeries(stem,first,last,blank,digits,ext,new,tif,scaling,damping
 		
 		#load the EDF image
 		ifile = formatfileedf % (stem, i)
-		print "Reading " + ifile
+		print("Reading " + ifile)
 		if (not(os.path.isfile(ifile))):
-			print ("Error: file %s not found" % ifile)
+			print(("Error: file %s not found" % ifile))
 			sys.exit(2)
 		# Open the EDF image file
 		imedf = fabio.open(ifile)
@@ -96,13 +101,13 @@ def flatFieldFileSeries(stem,first,last,blank,digits,ext,new,tif,scaling,damping
 		if (tif):
 			imtiff = fabio.tifimage.tifimage(newdata,headernew)
 			imtiff.save(image)
-			print "New image saved in " + image
+			print("New image saved in " + image)
 		else:
 			im3 = fabio.edfimage.edfimage()
 			im3.setData(newdata)
 			im3.setHeader(headernew)
 			im3.save(image)
-			print "New image saved in " + image   
+			print("New image saved in " + image)   
 	return
 	
 	
