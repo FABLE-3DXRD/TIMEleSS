@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function # To make print statements compatible with python3
+from six.moves import range
 
 """
 This is part of the TIMEleSS tools
@@ -32,6 +33,8 @@ Functions to remove diamond spots from a 3D-XRD images
 Original version, 6/Jul/2012
 """
 
+# Python 2 to python 3 migration tools
+from __future__ import absolute_import
 
 # System functions, to manipulate command line arguments
 import sys
@@ -49,7 +52,7 @@ import scipy.ndimage.filters
 import scipy.ndimage.morphology
 
 # Inpaint into a mask
-import inpaint
+from . import inpaint
 
 # Fabio, from ESRF fable package
 import fabio
