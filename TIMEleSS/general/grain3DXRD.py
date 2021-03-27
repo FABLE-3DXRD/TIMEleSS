@@ -97,6 +97,12 @@ class Grain:
 	def getPeaks(self):
 		return self.peaks
 	
+	def getMinTwoTheta(self):
+		return min([o.tthetameasured for o in self.peaks])
+	
+	def getMaxTwoTheta(self):
+		return max([o.tthetameasured for o in self.peaks])
+	
 	def getPeaksGVEID(self):
 		peaklist = []
 		for peak in self.peaks:
