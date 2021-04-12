@@ -44,6 +44,13 @@ import numpy
 from TIMEleSS.general import multigrainOutputParser
 from TIMEleSS.general import indexedPeak3DXRD
 
+# Explanation of the parameters:
+# grainsizelist:                An output file from the "timelessExtractGrainSizes.py" script. Should be a regular text document
+# beamsize_H and beamsize_V:    Horizontal and vertical dimension of the X-ray beam in $\mu$m. Necessary to calculate the illuminated sample volume.
+# rotationrange:                Full rotation range used in the experiment in $\mu$m. Necessary to calculate the illuminated sample volume more accurately.
+# samplethickness:              Thickness of the sample in $\mu$m. Necessary to calculate the illuminated sample volume.
+# indexquality:                 Quality of the previous indexing process in percent. Used to account for the fact that not all grains were found during the indexing.
+# volume:                       Boolean operator that determines if grainsizelist consists of grain volumes or grain radii. True means volumes, False means radii.
 
 def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume):
     with open(grainsizelist) as g:
@@ -126,7 +133,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     parser.add_argument('-V', '--beamsize_V', required=True, help="Beamsize parallel to rotation axis (µm), usually vertical (required)", type=float)
     parser.add_argument('-r', '--rotationrange', required=True, help="Full rotation range. Example: [-28,+28] rotation = 56 degrees (required)", type=float)
     parser.add_argument('-t', '--samplethickness', required=True, help="Thickness of your gasket indentation (µm, required)", type=float)
-    parser.add_argument('-i', '--indexquality', required=True, help="Percentage of indexed g-vectors (in %, required)", type=float)
+    parser.add_argument('-i', '--indexquality', required=True, help="Percentage of indexed g-vectors (in %). Estimate if not determined (required)", type=float)
     
     # Optionnal arguments
     parser.add_argument('-vol', '--volume', required=False, help="If True, treats grainsizelist as list of grain volumes. If False, treats grainsizelist as list of grain radii. Default is %(default)s", default=True, type=bool)
