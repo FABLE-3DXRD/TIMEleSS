@@ -45,7 +45,7 @@ from TIMEleSS.general import multigrainOutputParser
 from TIMEleSS.general import indexedPeak3DXRD
 
 
-def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationangle, gasketthickness, indexquality, volume):
+def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume):
     with open(grainsizelist) as g:
         grainsizes = g.readlines()
     total = 0
@@ -57,7 +57,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationangle, ga
     total = total * indexquality / 100 # Account for the indexing quality
     
     # Calculate the sample chamber volume. For more info on the formula ask M. Krug.
-    samplechambervol = gasketthickness * beamsize_H * beamsize_V * numpy.arccos(rotationangle*numpy.pi/180/2)
+    samplechambervol = samplethickness * beamsize_H * beamsize_V * numpy.arccos(rotationrange*numpy.pi/180/2)
     
     ratio_V = total / samplechambervol # How many µm^3 equals one relative grain size unit
     ratio_V = float(ratio_V)
@@ -112,10 +112,10 @@ def main(argv):
     Main subroutine
     """
     
-    parser = MyParser(usage='%(prog)s  [options] -w wavelength logfile.log fltfile.flt ciffile.cif', description="""Estimation of relative grain volumes based on diffraction intensities
+    parser = MyParser(usage='%(prog)s grainsizelist -H beamsize_horizontal (in $\mu$m) -V beamsize_vertical (in $\mu$m) -r rotation_range (in degrees) -t sample_thickness (in $\mu$m) -i indexing_quality (in %) [options]', description="""Estimation of absolute grain volumes in $\mu$m based on an "timelessExtractGrainSizes" output file
 
 Example:
-    %(prog)s -w 0.3738 mylogfile.log peaks-t100.flt crystal.cif
+    %(prog)s list_of_grainsizes.txt -H 1.5 -V 1.8 -r 56 -t 20 -i 76.2 -vol False -hist 30
 
 This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
 """, formatter_class=RawTextHelpFormatter)
@@ -124,8 +124,8 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     parser.add_argument('grainsizelist', help="Path and name for the GrainSize output file")
     parser.add_argument('-H', '--beamsize_H', required=True, help="Beamsize perpendicular to rotation axis (µm), usually horizontal (required)", type=float)
     parser.add_argument('-V', '--beamsize_V', required=True, help="Beamsize parallel to rotation axis (µm), usually vertical (required)", type=float)
-    parser.add_argument('-r', '--rotationangle', required=True, help="Full rotation angle. Example: [-28,+28] rotation = 56 degrees (required)", type=float)
-    parser.add_argument('-t', '--gasketthickness', required=True, help="Thickness of your gasket indentation (µm, required)", type=float)
+    parser.add_argument('-r', '--rotationrange', required=True, help="Full rotation range. Example: [-28,+28] rotation = 56 degrees (required)", type=float)
+    parser.add_argument('-t', '--samplethickness', required=True, help="Thickness of your gasket indentation (µm, required)", type=float)
     parser.add_argument('-i', '--indexquality', required=True, help="Percentage of indexed g-vectors (in %, required)", type=float)
     
     # Optionnal arguments
@@ -137,13 +137,13 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     grainsizelist = args['grainsizelist']
     beamsize_H = args['beamsize_H']
     beamsize_V = args['beamsize_V']
-    rotationangle = args['rotationangle']
-    gasketthickness = args['gasketthickness']
+    rotationrange = args['rotationrange']
+    samplethickness = args['samplethickness']
     indexquality = args['indexquality']
     volume = args['volume']
     histogram_bins = args['histogram_bins']
 
-    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationangle, gasketthickness, indexquality, volume)
+    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume)
 
     # Make a histogram
     if histogram_bins != None:
