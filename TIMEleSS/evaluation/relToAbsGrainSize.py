@@ -52,7 +52,7 @@ from TIMEleSS.general import indexedPeak3DXRD
 # indexquality:                 Quality of the previous indexing process in percent. Used to account for the fact that not all grains were found during the indexing.
 # volume:                       Boolean operator that determines if grainsizelist consists of grain volumes or grain radii. True means volumes, False means radii.
 
-def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume):
+def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume, proportion):
     with open(grainsizelist) as g:
         grainsizes = g.readlines()
     total = 0
@@ -61,7 +61,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
         if volume == False:
             grain = 4/3*numpy.pi()*grain^3 # Turn grain radii into grain volumes
         total += grain
-    total = total * indexquality / 100 # Account for the indexing quality
+    total = total * indexquality / 100 * proportion # Account for the indexing quality and side phases
     
     # Calculate the sample chamber volume. For more info on the formula ask M. Krug.
     samplechambervol = samplethickness * beamsize_H * beamsize_V * numpy.arccos(rotationrange*numpy.pi/180/2)
@@ -138,6 +138,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     # Optionnal arguments
     parser.add_argument('-vol', '--volume', required=False, help="If True, treats grainsizelist as list of grain volumes. If False, treats grainsizelist as list of grain radii. Default is %(default)s", default=True, type=bool)
     parser.add_argument('-hist', '--histogram_bins', required=False, help="If a histogram shall be plotted, give the number of histogram bins here. Default is %(default)s", default=None, type=int)
+    parser.add_argument('-prop', '--proportion', required=False, help="Gives the proportion of the phase of interest relative to the full sample volume. Example: Give 0.3 if your phase of interest makes up only 30% of your entire sample. Default is %(default)s.", default=1.0, type=float)
     
     # Parse arguments
     args = vars(parser.parse_args())
@@ -149,8 +150,9 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     indexquality = args['indexquality']
     volume = args['volume']
     histogram_bins = args['histogram_bins']
+    proportion = args['proportion']
 
-    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume)
+    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume, proportion)
 
     # Make a histogram
     if histogram_bins != None:
