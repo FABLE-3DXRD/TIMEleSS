@@ -94,6 +94,8 @@ setup(
 			'timelessPeaksFromCIF = TIMEleSS.simulation.printPeaksFromCIF:run',
 			'timelessFixGSOutput = TIMEleSS.evaluation.fixGrainSpotterOutput:run',
 			'timelessTthHistogram2Maud = TIMEleSS.evaluation.tthHistogram2Maud:run',
+			'timelessExtractGrainSizes = TIMEleSS.evaluation.extractGrainSizes:run',
+			'timelessRelToAbsGrainSize = TIMEleSS.evaluation.relToAbsGrainSize:run',
         ],
 		'gui_scripts': [
 		    'timelessPlotIndexedGrain = TIMEleSS.evaluation.testGrainsPeaksGui:run',
