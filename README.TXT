@@ -11,7 +11,11 @@ TIMEleSS is a joint French-German research project funded by ANR and DFG between
 
 TIMEleSS includes data collection using multigrain crystallography in the diamond anvil cell. This packqge is meant to hold the various scripts we use and make them available to the community.
 
-Information on TIMEleSS: http://timeless.texture.rocks/
+Information on the TIMEleSS project: http://timeless.texture.rocks/
+
+Manual for multigrain data processing: http://multigrain.texture.rocks/
+
+Descriptions of TIMEleSS-tools: http://multigrain.texture.rocks/doku.php?id=software:timelesstools
 
 *************************************************************************************
 Installation instructions
