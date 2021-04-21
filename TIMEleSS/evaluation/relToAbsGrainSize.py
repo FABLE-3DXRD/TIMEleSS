@@ -51,20 +51,22 @@ from TIMEleSS.general import indexedPeak3DXRD
 # samplethickness:              Thickness of the sample in $\mu$m. Necessary to calculate the illuminated sample volume.
 # indexquality:                 Quality of the previous indexing process in percent. Used to account for the fact that not all grains were found during the indexing.
 # volume:                       Boolean operator that determines if grainsizelist consists of grain volumes or grain radii. True means volumes, False means radii.
+# histogram_bins:               Number of histogram bins you want to use. By default, no histogram is plotted.
+# proportion:                   Defines how much of the sample is your phase of interest. Can be between 0 and 1.
 
-def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume, proportion):
+def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume=True, proportion=1.0):
     with open(grainsizelist) as g:
         grainsizes = g.readlines()
     total = 0
     for grain in grainsizes:
         grain = float(grain)
         if volume == False:
-            grain = 4/3*numpy.pi()*grain^3 # Turn grain radii into grain volumes
+            grain = 4/3*numpy.pi*grain**3 # Turn grain radii into grain volumes
         total += grain
     total = total * indexquality / 100 * proportion # Account for the indexing quality and side phases
     
-    # Calculate the sample chamber volume. For more info on the formula ask M. Krug.
-    samplechambervol = samplethickness * beamsize_H * beamsize_V * numpy.arccos(rotationrange*numpy.pi/180/2)
+    # Calculate the sample chamber volume. Check the wiki for more info on the formula
+    samplechambervol = beamsize_V * beamsize_H * samplethickness * numpy.cos(rotationrange*numpy.pi/180/2) + 0.5 * beamsize_V * samplethickness**2 * numpy.tan(rotationrange*numpy.pi/180/2)
     
     ratio_V = total / samplechambervol # How many µm^3 equals one relative grain size unit
     ratio_V = float(ratio_V)
@@ -152,7 +154,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     histogram_bins = args['histogram_bins']
     proportion = args['proportion']
 
-    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume, proportion)
+    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume=volume, proportion=proportion)
 
     # Make a histogram
     if histogram_bins != None:
@@ -166,7 +168,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
         else:
             radii = []
             for item in grainsizes_new:
-                radius = (3*item/4/numpy.pi())^(1/3)
+                radius = (3*item/4/numpy.pi)**(1/3)
                 radii.append(radius)
             print ("Plotting histogram ...\n")
             plt.hist(radii, bins = histogram_bins)
