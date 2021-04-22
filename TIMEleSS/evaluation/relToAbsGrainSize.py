@@ -61,7 +61,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     for grain in grainsizes:
         grain = float(grain)
         if volume == False:
-            grain = 4/3*numpy.pi*grain**3 # Turn grain radii into grain volumes
+            grain = 4./3*numpy.pi*grain**(3.) # Turn grain radii into grain volumes
         total += grain
     total = total * indexquality / 100 * proportion # Account for the indexing quality and side phases
     
@@ -71,7 +71,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     ratio_V = total / samplechambervol # How many µm^3 equals one relative grain size unit
     ratio_V = float(ratio_V)
     print (ratio_V)
-    ratio_R = ratio_V**(1/3)
+    ratio_R = ratio_V**(1./3)
     
     # Create a new file that contains the absolute grain size 
     newfile = grainsizelist[:-4] + "_abs.txt"
@@ -168,7 +168,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
         else:
             radii = []
             for item in grainsizes_new:
-                radius = (3*item/4/numpy.pi)**(1/3)
+                radius = (3*item/4/numpy.pi)**(1./3)
                 radii.append(radius)
             print ("Plotting histogram ...\n")
             plt.hist(radii, bins = histogram_bins)
