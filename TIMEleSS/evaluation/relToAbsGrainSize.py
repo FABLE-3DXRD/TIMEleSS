@@ -166,12 +166,8 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
             plt.title("n = %s" % len(grainsizes_new), fontsize = 20)
             plt.show()
         else:
-            radii = []
-            for item in grainsizes_new:
-                radius = (3*item/4/numpy.pi)**(1./3)
-                radii.append(radius)
             print ("Plotting histogram ...\n")
-            plt.hist(radii, bins = histogram_bins)
+            plt.hist(grainsizes_new, bins = histogram_bins)
             plt.xlabel("Grain radii ($\mu$m)")
             plt.ylabel("Number of grains")
             plt.title("n = %s" % len(grainsizes_new), fontsize = 20)
