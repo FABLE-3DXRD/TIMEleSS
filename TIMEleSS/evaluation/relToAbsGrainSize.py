@@ -50,17 +50,17 @@ from TIMEleSS.general import indexedPeak3DXRD
 # rotationrange:                Full rotation range used in the experiment in $\mu$m. Necessary to calculate the illuminated sample volume more accurately.
 # samplethickness:              Thickness of the sample in $\mu$m. Necessary to calculate the illuminated sample volume.
 # indexquality:                 Quality of the previous indexing process in percent. Used to account for the fact that not all grains were found during the indexing.
-# volume:                       Boolean operator that determines if grainsizelist consists of grain volumes or grain radii. True means volumes, False means radii.
+# radii:                        Boolean operator that determines if grainsizelist consists of grain volumes or grain radii. True means volumes, False means radii.
 # histogram_bins:               Number of histogram bins you want to use. By default, no histogram is plotted.
 # proportion:                   Defines how much of the sample is your phase of interest. Can be between 0 and 1.
 
-def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume=True, proportion=1.0):
+def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radii=True, proportion=1.0):
     with open(grainsizelist) as g:
         grainsizes = g.readlines()
     total = 0
     for grain in grainsizes:
         grain = float(grain)
-        if volume == False:
+        if radii == False:
             grain = 4./3*numpy.pi*grain**(3.) # Turn grain radii into grain volumes
         total += grain
     total = total * indexquality / 100 * proportion # Account for the indexing quality and side phases
@@ -79,7 +79,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     string = ""
     for grain in grainsizes:
         grain = float(grain)
-        if volume == False:
+        if radii == False:
             grain = grain * ratio_R
         else:
             grain = grain * ratio_V
@@ -89,7 +89,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     f.write(string)
     f.close()
     
-    if volume == True:
+    if radii == True:
         print ("\nA volumetric grain size of 1.0 in your list of grainsizes corresponds to %0.3f µm^3." % (ratio_V))
         print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
     else:
@@ -138,7 +138,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     parser.add_argument('-i', '--indexquality', required=True, help="Percentage of indexed g-vectors (in percent). Estimate if not determined (required)", type=float)
     
     # Optionnal arguments
-    parser.add_argument('-vol', '--volume', required=False, help="If True, treats grainsizelist as list of grain volumes. If False, treats grainsizelist as list of grain radii. Default is %(default)s", default=True, type=bool)
+    parser.add_argument('-rad', '--radii', required=False, help="Add '-rad' to treat the grainsizelist as list of grain radii. Don´t add this argument to treat the grainsizelist as list of grain volumes. Default is %(default)s", default=True, action='store_false')
     parser.add_argument('-hist', '--histogram_bins', required=False, help="If a histogram shall be plotted, give the number of histogram bins here. Default is %(default)s", default=None, type=int)
     parser.add_argument('-prop', '--proportion', required=False, help="Gives the proportion of the phase of interest relative to the full sample volume. Example: Give 0.3 if your phase of interest makes up only 30 percent of your entire sample. Default is %(default)s.", default=1.0, type=float)
     
@@ -150,15 +150,15 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     rotationrange = args['rotationrange']
     samplethickness = args['samplethickness']
     indexquality = args['indexquality']
-    volume = args['volume']
+    radii = args['radii']
     histogram_bins = args['histogram_bins']
     proportion = args['proportion']
 
-    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, volume=volume, proportion=proportion)
+    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radii=radii, proportion=proportion)
 
     # Make a histogram
     if histogram_bins != None:
-        if volume == True:
+        if radii == True:
             print ("Plotting histogram ...\n")
             plt.hist(grainsizes_new, bins = histogram_bins)
             plt.xlabel("Grain volume ($\mu$m^3)")
