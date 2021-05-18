@@ -79,6 +79,7 @@ setup(
 			'timelessEdf2tiffFileSeries = TIMEleSS.diffraction.edf2tiffFileSeries:run',
 			'timelessEdf2tiff = TIMEleSS.diffraction.edf2tiffSingle:run',
 			'timelessAverageEDF = TIMEleSS.diffraction.averageImage:run',
+			'timelessSubtractEDF = TIMEleSS.diffraction.subtractImage:run',
 			'timelessMeanFileSeries = TIMEleSS.diffraction.meanFileSeries:run',
 			'timelessCreateEmptyImage = TIMEleSS.diffraction.createEmptyImage:run',
 			'timelessDiamondSpotRemoval = TIMEleSS.diffraction.diamondSpotRemoval:run',
