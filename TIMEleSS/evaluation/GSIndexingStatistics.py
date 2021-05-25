@@ -64,6 +64,7 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 	
 	# Load .gve file from ImageD11 :
 	[peaksgve,idlist,header] = multigrainOutputParser.parseGVE(gve) 
+	print("Parsing header from GVE files %s to extract predicted sample peaks" % (gve))
 	# Extracting list of g-vectors from the header
 	peakssample = []
 	recordpeaks = False
@@ -72,19 +73,27 @@ def gs_indexing_statistics(logfile, gve, gsinput, wavelength):
 		if ((line.strip() == "#  gx  gy  gz  xc  yc  ds  eta  omega  spot3d_id  xl  yl  zl")):
 			recordpeaks = False
 		if recordpeaks:
-			tt = line.split()
-			ds = float(tt[0])
-			h = int(tt[1])
-			k = int(tt[2])
-			l = int(tt[3])
+			try:
+				tt = line.split()
+				ds = float(tt[0])
+				h = int(tt[1])
+				k = int(tt[2])
+				l = int(tt[3])
+			except ValueError:
+				print("Conversion error when reading predicted sample peaks from %s." % (gve))
+				print("Was trying to convert %s to ds, h, k, and l" % (line))
+				sys.exit(1)
 			peakssample.append([ds,h,k,l])
 			#print h, k, l
 		if ((line.strip() == "# ds h k l")):
 			recordpeaks = True
 		
 	
+	print("Parsing grain spotter input file %s." % (gsinput))
 	# Load the grain spotter input file
 	gsinput =  multigrainOutputParser.parseGSInput(gsinput) 
+
+	print("Done parsing files.")
 	
 	# Try to see if all g-vectors in the indexed grains are in the gve
 	nindexed = 0
