@@ -60,7 +60,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     total = 0
     for grain in grainsizes:
         grain = float(grain)
-        if radius == False:
+        if radius == False: # Note that if radius == False, we are talking about radii, not volumes!
             grain = 4./3*numpy.pi*grain**(3.) # Turn grain radii into grain volumes
         total += grain
     total = total * indexquality / 100 * proportion # Account for the indexing quality and side phases
@@ -68,7 +68,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     # Calculate the sample chamber volume. Check the wiki for more info on the formula.
     samplechambervol = beamsize_V * beamsize_H * samplethickness * numpy.cos(rotationrange*numpy.pi/180/2) + 0.5 * beamsize_V * samplethickness**2 * numpy.tan(rotationrange*numpy.pi/180/2)
     
-    ratio_V = total / samplechambervol # How many µm^3 equals one relative grain size unit
+    ratio_V = samplechambervol / total # How many µm^3 equals one relative grain size unit
     ratio_V = float(ratio_V)
     
     ratio_R = ratio_V**(1./3)
@@ -89,13 +89,15 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     f.write(string)
     f.close()
     
+    med = numpy.median(grainsizes_new)
+    
     if radius == True:
         print ("\nA volumetric grain size of 1.0 in your list of grainsizes corresponds to %0.3f µm^3." % (ratio_V))
         print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
     else:
         print ("\nA grain radius of 1.0 in your list of grainsizes corresponds to %0.3f µm." % (ratio_R))
         print ("\nSaved new list of grain radii (in µm) as %s." % (newfile))
-    return grainsizes_new
+    return grainsizes_new, med
 
 
 
@@ -161,16 +163,24 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
         if radius == True: # Note that if radius == True, we are actually talking about volumes!
             print ("Plotting histogram ...\n")
             plt.hist(grainsizes_new, bins = histogram_bins)
+            plt.xscale('log')
             plt.xlabel("Grain volume ($\mu$m^3)")
             plt.ylabel("Number of grains")
             plt.title("n = %s" % len(grainsizes_new), fontsize = 20)
+            plt.axvline(med, color='k', linestyle='dashed', linewidth=1)
+            ylim_min, ylim_max = plt.ylim()
+            plt.text(med*1.1, ylim_max*0.9, 'Median: {:.4f} $\mu$m^3'.format(med))
             plt.show()
         else:
             print ("Plotting histogram ...\n")
             plt.hist(grainsizes_new, bins = histogram_bins)
+            plt.xscale('log')
             plt.xlabel("Grain radii ($\mu$m)")
             plt.ylabel("Number of grains")
             plt.title("n = %s" % len(grainsizes_new), fontsize = 20)
+            plt.axvline(med, color='k', linestyle='dashed', linewidth=1)
+            ylim_min, ylim_max = plt.ylim()
+            plt.text(med*1.1, ylim_max*0.9, 'Median: {:.4f} $\mu$m'.format(med))
             plt.show()
             
         
