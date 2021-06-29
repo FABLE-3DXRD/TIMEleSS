@@ -156,7 +156,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     histogram_bins = args['histogram_bins']
     proportion = args['proportion']
 
-    grainsizes_new = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radius=radius, proportion=proportion)
+    grainsizes_new, med = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radius=radius, proportion=proportion)
 
     # Make a histogram
     if histogram_bins != None:
