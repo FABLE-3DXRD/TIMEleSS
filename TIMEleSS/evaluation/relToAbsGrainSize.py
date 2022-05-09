@@ -36,8 +36,8 @@ from argparse import RawTextHelpFormatter
 
 # Maths stuff
 import matplotlib
-import matplotlib.pyplot as plt
 matplotlib.use("Qt5Agg")
+import matplotlib.pyplot as plt
 import numpy
 
 # Explanation of the parameters:
