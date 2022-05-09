@@ -40,10 +40,6 @@ import matplotlib.pyplot as plt
 matplotlib.use("Qt5Agg")
 import numpy
 
-# TIMEleSS parsing utilities
-from TIMEleSS.general import multigrainOutputParser
-from TIMEleSS.general import indexedPeak3DXRD
-
 # Explanation of the parameters:
 # grainsizelist:                An output file from the "timelessExtractGrainSizes.py" script. Should be a regular text document
 # beamsize_H and beamsize_V:    Horizontal and vertical dimension of the X-ray beam in $\mu$m. Necessary to calculate the illuminated sample volume.
