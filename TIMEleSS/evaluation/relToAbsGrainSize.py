@@ -113,8 +113,12 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
 	f.close()
 	print ("Saved new list of grain radii (in µm) as %s." % (newfile))
 	
+	# Print out some statistics
+	print ("\nGrain volumes:\n\tmean: %d\n\tmedian: %d\n\tmax: %d\n\tmin: %d" % (numpy.mean(grainsizes_V), numpy.median(grainsizes_V), numpy.min(grainsizes_V), numpy.max(grainsizes_V)))
+	print ("\nGrain radii:\n\tmean: %.2f\n\tmedian: %.2f\n\tmax: %.2f\n\tmin: %.2f" % (numpy.mean(grainsizes_R), numpy.median(grainsizes_R), numpy.min(grainsizes_R), numpy.max(grainsizes_R)))
+	
+	# Return grain radii
 	med = numpy.median(grainsizes_R)
-
 	return grainsizes_R, med
 
 
