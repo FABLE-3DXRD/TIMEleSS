@@ -91,29 +91,31 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     # Create a new file that contains the absolute grain size 
     newfile = grainsizelist[:-4] + "_abs.txt"
     filename, file_extension = os.path.splitext(grainsizelist)
-    newfile = filename + "_abs.txt"
-    grainsizes_new = [] # Make a list of the new grain sizes
-    string = ""
+    grainsizes_R = [] # Make a list of the new grain sizes
+    grainsizes_V = [] # Make a list of the new grain sizes
+    stringV = ""
+    stringR = ""
     for grainRelV in grainRelVolumes:
         grainV = grainRelV * ratio_V
-        if radius == True:
-            grainR = (grainV*3./(4.*numpy.pi))**(1./3)
-            grainsizes_new.append(grainR)
-            string += str(grainR) + "\n"
-        else:
-            grainsizes_new.append(grainV)
-            string += str(grainV) + "\n"
+        grainR = (grainV*3./(4.*numpy.pi))**(1./3)
+        stringV += str(grainV) + "\n"
+        stringR += str(grainR) + "\n"
+        grainsizes_R.append(grainR)
+        grainsizes_V.append(grainV)
+    newfile = filename + "_absV.txt"
     f= open(newfile,"w+")
-    f.write(string)
+    f.write(stringV)
     f.close()
+    print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
+    newfile = filename + "_absR.txt"
+    f= open(newfile,"w+")
+    f.write(stringR)
+    f.close()
+    print ("Saved new list of grain radii (in µm) as %s." % (newfile))
     
-    med = numpy.median(grainsizes_new)
-    
-    if radius == True:
-        print ("\nSaved new list of grain radii (in µm) as %s." % (newfile))
-    else:
-        print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
-    return grainsizes_new, med
+    med = numpy.median(grainsizes_R)
+
+    return grainsizes_R, med
 
 
 
@@ -172,32 +174,20 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     histogram_bins = args['histogram_bins']
     proportion = args['proportion']
 
-    grainsizes_new, med = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radius=radius, proportion=proportion)
+    grainsizes_R, med = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radius=radius, proportion=proportion)
 
     # Make a histogram
     if histogram_bins != None:
-        if radius == True: # Note that if radius == True, we are actually talking about volumes!
-            print ("Plotting histogram ...\n")
-            plt.hist(grainsizes_new, bins = histogram_bins)
-            plt.xscale('log')
-            plt.xlabel("Grain volume ($\mu$m^3)")
-            plt.ylabel("Number of grains")
-            plt.title("n = %s" % len(grainsizes_new), fontsize = 20)
-            plt.axvline(med, color='k', linestyle='dashed', linewidth=1)
-            ylim_min, ylim_max = plt.ylim()
-            plt.text(med*1.1, ylim_max*0.9, 'Median: {:.4f} $\mu$m^3'.format(med))
-            plt.show()
-        else:
-            print ("Plotting histogram ...\n")
-            plt.hist(grainsizes_new, bins = histogram_bins)
-            plt.xscale('log')
-            plt.xlabel("Grain radii ($\mu$m)")
-            plt.ylabel("Number of grains")
-            plt.title("n = %s" % len(grainsizes_new), fontsize = 20)
-            plt.axvline(med, color='k', linestyle='dashed', linewidth=1)
-            ylim_min, ylim_max = plt.ylim()
-            plt.text(med*1.1, ylim_max*0.9, 'Median: {:.4f} $\mu$m'.format(med))
-            plt.show()
+         print ("\nPlotting histogram ...\n")
+         plt.hist(grainsizes_R, bins = histogram_bins)
+         plt.xscale('log')
+         plt.xlabel("Grain radii ($\mu$m)")
+         plt.ylabel("Number of grains")
+         plt.title("n = %s" % len(grainsizes_R), fontsize = 20)
+         plt.axvline(med, color='k', linestyle='dashed', linewidth=1)
+         ylim_min, ylim_max = plt.ylim()
+         plt.text(med*1.1, ylim_max*0.9, 'Median: {:.4f} $\mu$m'.format(med))
+         plt.show()
             
         
 # Calling method 1 (used when generating a binary in setup.py)
