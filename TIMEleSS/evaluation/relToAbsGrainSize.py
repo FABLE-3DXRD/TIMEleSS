@@ -58,33 +58,55 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     with open(grainsizelist) as g:
         grainsizes = g.readlines()
     total = 0
+    ngrains = 0
+    grainRelVolumes = []
     for grain in grainsizes:
+        ngrains += 1
         grain = float(grain)
-        if radius == False: # Note that if radius == False, we are talking about radii, not volumes!
-            grain = 4./3*numpy.pi*grain**(3.) # Turn grain radii into grain volumes
-        total += grain
-    total = total * indexquality / 100 * proportion # Account for the indexing quality and side phases
-    
+        if (radius): # Grain size in file is a radius
+            grainV = 4./3*numpy.pi*grain**(3.) # Turn grain radii into grain volumes
+            grainRelVolumes.append(grainV)
+        else: 
+            grainV = grain
+            grainRelVolumes.append(grainV)
+        total += grainV
+    total = total
+  
     # Calculate the sample chamber volume. Check the wiki for more info on the formula.
-    samplechambervol = beamsize_V * beamsize_H * samplethickness * numpy.cos(rotationrange*numpy.pi/180/2) + 0.5 * beamsize_V * samplethickness**2 * numpy.tan(rotationrange*numpy.pi/180/2)
+    totalsamplechambervol = beamsize_V * beamsize_H * samplethickness * numpy.cos(rotationrange*numpy.pi/180/2) + 0.5 * beamsize_V * samplethickness**2 * numpy.tan(rotationrange*numpy.pi/180/2)
+    indexedGrainsV = totalsamplechambervol * indexquality / 100. * proportion # Account for the indexing quality and side phases
+    print("Read arbitrary grain sizes from %s" % grainsizelist)
+    if (radius):
+         print("I believe I read a list of grain radii")
+    else:
+         print("I believe I read a list of grain volumes")
+    print("Beam size H x V (µm): %.1f, %.1f" % (beamsize_H, beamsize_V))
+    print("Sample thickness (µm): %.1f" % (samplethickness))
+    print("Rotation range (degrees): %.1f" % (rotationrange))
+    print("Indexing quality (percents): %i" % (indexquality))
+    print("Phase proportion (relative): %.2f" % (proportion))
+    print("Total illuminated sample chamber volume (µm^3): %.1f" % totalsamplechambervol)
+    print("Total volume of indexed grains (µm^3): %.1f" % indexedGrainsV)
+    print("Total volume of indexed grains (arbitrary unit): %.1f" % total)
+    print("Number of grains: %i" % ngrains)
     
-    ratio_V = samplechambervol / total # How many µm^3 equals one relative grain size unit
-    ratio_V = float(ratio_V)
-    
-    ratio_R = ratio_V**(1./3)
+    ratio_V = indexedGrainsV / total # How many µm^3 equals one relative grain size unit
     
     # Create a new file that contains the absolute grain size 
     newfile = grainsizelist[:-4] + "_abs.txt"
+    filename, file_extension = os.path.splitext(grainsizelist)
+    newfile = filename + "_abs.txt"
     grainsizes_new = [] # Make a list of the new grain sizes
     string = ""
-    for grain in grainsizes:
-        grain = float(grain)
-        if radius == False:
-            grain = grain * ratio_R
+    for grainRelV in grainRelVolumes:
+        grainV = grainRelV * ratio_V
+        if radius == True:
+            grainR = (grainV*3./(4.*numpy.pi))**(1./3)
+            grainsizes_new.append(grainR)
+            string += str(grainR) + "\n"
         else:
-            grain = grain * ratio_V
-        grainsizes_new.append(grain)
-        string += str(grain) + "\n"
+            grainsizes_new.append(grainV)
+            string += str(grainV) + "\n"
     f= open(newfile,"w+")
     f.write(string)
     f.close()
@@ -92,11 +114,9 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
     med = numpy.median(grainsizes_new)
     
     if radius == True:
-        print ("\nA volumetric grain size of 1.0 in your list of grainsizes corresponds to %0.3f µm^3." % (ratio_V))
-        print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
-    else:
-        print ("\nA grain radius of 1.0 in your list of grainsizes corresponds to %0.3f µm." % (ratio_R))
         print ("\nSaved new list of grain radii (in µm) as %s." % (newfile))
+    else:
+        print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
     return grainsizes_new, med
 
 
@@ -140,7 +160,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     parser.add_argument('-i', '--indexquality', required=True, help="Percentage of indexed g-vectors (in percent). Estimate if not determined (required)", type=float)
     
     # Optionnal arguments
-    parser.add_argument('-rad', '--radius', required=False, help="Add '-rad' to treat the grainsizelist as list of grain radii. Don´t add this argument to treat the grainsizelist as list of grain volumes. Default is volumes.", default=True, action='store_false')
+    parser.add_argument('-rad', '--radius', required=False, help="Add '-rad' to treat the grainsizelist as list of grain radii. Don´t add this argument to treat the grainsizelist as list of grain volumes. Default is volumes.", default=False, action='store_true')
     parser.add_argument('-hist', '--histogram_bins', required=False, help="If a histogram shall be plotted, give the number of histogram bins here. Default is %(default)s", default=None, type=int)
     parser.add_argument('-p', '--proportion', required=False, help="Gives the proportion of the phase of interest relative to the full sample volume. Example: Give 0.3 if your phase of interest makes up only 30 percent of your entire sample. Default is %(default)s.", default=1.0, type=float)
     
@@ -191,3 +211,4 @@ def run():
 # Calling method 2 (if run from the command line)
 if __name__ == "__main__":
     main(sys.argv[1:])
+ 
