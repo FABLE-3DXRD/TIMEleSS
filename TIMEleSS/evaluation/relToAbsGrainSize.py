@@ -182,7 +182,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
 
 	# Make a histogram
 	if histogram_bins != None:
-		print ("\nPlotting histogram ...\n")
+		print ("\nPlotting histogram of grain radii ...\n")
 		plt.hist(grainsizes_R, bins = histogram_bins)
 		plt.xscale('log')
 		plt.xlabel("Grain radii ($\mu$m)")
