@@ -40,80 +40,130 @@ import matplotlib.pyplot as plt
 matplotlib.use("Qt5Agg")
 import numpy
 
-# Explanation of the parameters:
-# grainsizelist:                An output file from the "timelessExtractGrainSizes.py" script. Should be a regular text document
-# beamsize_H and beamsize_V:    Horizontal and vertical dimension of the X-ray beam in $\mu$m. Necessary to calculate the illuminated sample volume.
-# rotationrange:                Full rotation range used in the experiment in $\mu$m. Necessary to calculate the illuminated sample volume more accurately.
-# samplethickness:              Thickness of the sample in $\mu$m. Necessary to calculate the illuminated sample volume.
-# indexquality:                 Quality of the previous indexing process in percent. Used to account for the fact that not all grains were found during the indexing.
-# radius:                       Boolean operator that determines if grainsizelist consists of grain volumes or grain radii. True means volumes, False means radii.
-# histogram_bins:               Number of histogram bins you want to use. By default, no histogram is plotted.
-# proportion:                   Defines how much of the sample is your phase of interest. Can be between 0 and 1.
+# TIMEleSS parsing utilities
+from TIMEleSS.general import multigrainOutputParser
+from TIMEleSS.general import indexedPeak3DXRD
+from TIMEleSS.general import cifTools
 
-def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radius=True, proportion=1.0):
-    with open(grainsizelist) as g:
-        grainsizes = g.readlines()
-    total = 0
-    ngrains = 0
-    grainRelVolumes = []
-    for grain in grainsizes:
-        ngrains += 1
-        grain = float(grain)
-        if (radius): # Grain size in file is a radius
-            grainV = 4./3*numpy.pi*grain**(3.) # Turn grain radii into grain volumes
-            grainRelVolumes.append(grainV)
-        else: 
-            grainV = grain
-            grainRelVolumes.append(grainV)
-        total += grainV
-    total = total
-  
-    # Calculate the sample chamber volume. Check the wiki for more info on the formula.
-    totalsamplechambervol = beamsize_V * beamsize_H * samplethickness * numpy.cos(rotationrange*numpy.pi/180/2) + 0.5 * beamsize_V * samplethickness**2 * numpy.tan(rotationrange*numpy.pi/180/2)
-    indexedGrainsV = totalsamplechambervol * indexquality / 100. * proportion # Account for the indexing quality and side phases
-    print("Read arbitrary grain sizes from %s" % grainsizelist)
-    if (radius):
-         print("I believe I read a list of grain radii")
-    else:
-         print("I believe I read a list of grain volumes")
-    print("Beam size H x V (µm): %.1f, %.1f" % (beamsize_H, beamsize_V))
-    print("Sample thickness (µm): %.1f" % (samplethickness))
-    print("Rotation range (degrees): %.1f" % (rotationrange))
-    print("Indexing quality (percents): %i" % (indexquality))
-    print("Phase proportion (relative): %.2f" % (proportion))
-    print("Total illuminated sample chamber volume (µm^3): %.1f" % totalsamplechambervol)
-    print("Total volume of indexed grains (µm^3): %.1f" % indexedGrainsV)
-    print("Total volume of indexed grains (arbitrary unit): %.1f" % total)
-    print("Number of grains: %i" % ngrains)
+
+# This script determines an average relative grain size of a multigrain dataset.
+
+# Moved histogram out of the function. I do not like to mix calculations and gui in a single function
+
+def grainSizeEstimate(logfile, fltfile, ciffile, wavelength, ttheta_min=None, ttheta_max=None, output_vol=None, output_rad=None, kickoutfactor=20):
+    """
+    Determination of grain size statistics based on diffraction intensities
+    Diffracting intensities for each peak is normalized by the theoretical intensity (structure factor and Lorentz correction) for that peak
     
-    ratio_V = indexedGrainsV / total # How many µm^3 equals one relative grain size unit
+    Params:
+     - logfile
+     - fltfile
+     - ciffile
+     - wavelength (in angstroms)
+     - ttheta_min: min value for 2theta is simulation of peaks from cif, in degrees, guessed from GS output file if set to None)
+     - ttheta_max: max value for 2theta is simulation of peaks from cif, in degrees, guessed from GS output file if set to None)
+     - output: name of output file to save results in a file
+     - kickoutfactor: remove grains for which the averageI is >= kickoutfactor*medianI
     
-    # Create a new file that contains the absolute grain size 
-    newfile = grainsizelist[:-4] + "_abs.txt"
-    filename, file_extension = os.path.splitext(grainsizelist)
-    newfile = filename + "_abs.txt"
-    grainsizes_new = [] # Make a list of the new grain sizes
-    string = ""
-    for grainRelV in grainRelVolumes:
-        grainV = grainRelV * ratio_V
-        if radius == True:
-            grainR = (grainV*3./(4.*numpy.pi))**(1./3)
-            grainsizes_new.append(grainR)
-            string += str(grainR) + "\n"
+    Returns:
+        a list of grain volumes, assuming that grain volume is proportionnal to diffraction intensity
+
+    Created: 3/2021, M. Krug, Univ. Münster, S. Merkel, Univ. Lille, France
+    """
+    
+    # Parsing indexing output files
+    grains = multigrainOutputParser.parseGrains(logfile)
+    ngrains = len(grains)
+    print("Parsed grains from %s, found %d grains" % (logfile, ngrains))
+    [peaksflt,idlist,header] = multigrainOutputParser.parseFLT(fltfile)
+    npeaks = len(idlist)
+    
+    #with open(ciffile) as f: # Only if you saved a list of theoretical intensities first
+    #    cifpeaks = f.readlines()
+    #cifpeaks = cifpeaks[4:]
+    
+    # Preparing a list of theoretical intensities based on CIF
+    if (ttheta_min is None):
+        mintt = []
+        for grain in grains:
+            mintt.append(grain.getMinTwoTheta())
+        ttheta_min = min(mintt)-1.
+    if (ttheta_max is None):
+        maxtt = []
+        for grain in grains:
+            maxtt.append(grain.getMaxTwoTheta())
+        ttheta_max = max(maxtt)+1.
+    cifpeaks = cifTools.peaksFromCIF(ciffile, ttheta_min,  ttheta_max, wavelength) 
+    print("Calculated list of theoretical diffraction peak intensities from %s" % (ciffile))
+    
+    # Storing theoretical peak intensities in a dictionnary
+    intensityDic = {}
+    for elt in cifpeaks:
+        h = int(elt[0])
+        k = int(elt[1])
+        l = int(elt[2])
+        # trick: Pnma to Pbnm
+        # h = int(elt[2])
+        # k = int(elt[0])
+        # l = int(elt[1])
+        intensityDic[(h,k,l)] = float(elt[4])
+
+    # Preparing a list to store normalized grain sizes    
+    grainsizes = []
+    grainID = 0
+    
+    # Loop on grains
+    for grain in grains:
+        grainID += 1
+        peaks = grain.getPeaks()
+        grainintensity = [] # A temporary list containing the normalized intensities
+        for peak in peaks:
+            try:
+                index = idlist.index(peak.getPeakID())
+                intensity = peaksflt[index]['sum_intensity']
+            except IndexError:
+                print ("Failed to locate peak ID %d which was found in grain %s" % (peak.getPeakID(), grain.getName()))
+                return
+            hkl = peak.getHKL()
+            try:
+                cifintensity = intensityDic[(hkl[0],hkl[1],hkl[2])] 
+                relat_intensity = float(intensity) / float(cifintensity) # Normalize by theoretical intensity
+                grainintensity.append(relat_intensity) # Append to list
+            except KeyError:
+                print ("Failed to find theoretical peak intensity for %d %d %d" % (hkl[0],hkl[1],hkl[2]))
+        # Make sure that you kick out outliers with surprizingly high intensities by comparing average and median    
+        average = sum(grainintensity) / len(grainintensity) # av int for each grain
+        kickout = kickoutfactor*numpy.median(grainintensity) # kickoutfactor times median of each grain
+        if average >= kickout:
+            print ("\nIntensities of grain %s are a bit shakey\n--> Grain %s is removed from the list." % (grainID,grainID))
         else:
-            grainsizes_new.append(grainV)
-            string += str(grainV) + "\n"
-    f= open(newfile,"w+")
-    f.write(string)
-    f.close()
-    
-    med = numpy.median(grainsizes_new)
-    
-    if radius == True:
-        print ("\nSaved new list of grain radii (in µm) as %s." % (newfile))
+            grainsizes.append(average) # Collect the averages in a list
+
+    # Print the result to the console or save into a file
+    string_V = ""
+    string_R = ""
+    for item in grainsizes:
+        string_V += str(item) + "\n"
+        radius = (3*item/4/numpy.pi)**(1/3)
+        string_R += str(radius) + "\n"
+    if output_vol is None:
+        print (string_V)
+        print ("Printed relative grain volumes to the command line")
+        # pass
     else:
-        print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
-    return grainsizes_new, med
+        f= open(output_vol,"w+")
+        f.write(string_V)
+        f.close()
+        print ("Saved list of relative grain volumes in %s" % (output_vol))
+    if output_rad is None:
+        pass
+    else:
+        f= open(output_rad,"w+")
+        f.write(string_R)
+        f.close()
+        print ("Saved list of relative grain radii in %s" % (output_rad))
+    print ("\nDetermined relative grain sizes for %d grains.\n" % len(grainsizes))
+    return grainsizes
 
 
 
@@ -139,67 +189,68 @@ def main(argv):
     Main subroutine
     """
     
-    parser = MyParser(usage='%(prog)s grainsizelist -H beamsize_horizontal (in micrometer) -V beamsize_vertical (in micrometer) -r rotation_range (in degrees) -t sample_thickness (in micrometer) -i indexing_quality (in percents) [options]', description="""Estimation of absolute grain volumes in micrometer based on an "timelessExtractGrainSizes" output file
+    parser = MyParser(usage='%(prog)s  [options] -w wavelength logfile.log fltfile.flt ciffile.cif', description="""Estimation of relative grain volumes based on diffraction intensities
 
 Example:
-    %(prog)s list_of_grainsizes.txt -H 1.5 -V 1.8 -r 56 -t 20 -i 76.2 -rad -hist 30 -p 0.7
+    %(prog)s -w 0.3738 mylogfile.log peaks-t100.flt crystal.cif
 
 This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
 """, formatter_class=RawTextHelpFormatter)
     
     # Required arguments
-    parser.add_argument('grainsizelist', help="Path and name for the GrainSize output file")
-    parser.add_argument('-H', '--beamsize_H', required=True, help="Beamsize perpendicular to rotation axis (micrometer), usually horizontal (required)", type=float)
-    parser.add_argument('-V', '--beamsize_V', required=True, help="Beamsize parallel to rotation axis (micrometer), usually vertical (required)", type=float)
-    parser.add_argument('-r', '--rotationrange', required=True, help="Full rotation range. Example: [-28,+28] rotation = 56 degrees (required)", type=float)
-    parser.add_argument('-t', '--samplethickness', required=True, help="Thickness of your sample (micrometer). If sample has varying thickness, estimate an average. (required)", type=float)
-    parser.add_argument('-i', '--indexquality', required=True, help="Percentage of indexed g-vectors (in percent). Estimate if not determined (required)", type=float)
+    parser.add_argument('logfile', help="Path and name for GrainSpotter output file")
+    parser.add_argument('fltfile', help="Path and name for fltfile")
+    parser.add_argument('ciffile', help="Path and name for CIF file")
+    parser.add_argument('-w', '--wavelength', required=True, help="Wavelength (angstrom, required)", type=float)
     
     # Optionnal arguments
-    parser.add_argument('-rad', '--radius', required=False, help="Add '-rad' to treat the grainsizelist as list of grain radii. Don´t add this argument to treat the grainsizelist as list of grain volumes. Default is volumes.", default=False, action='store_true')
-    parser.add_argument('-hist', '--histogram_bins', required=False, help="If a histogram shall be plotted, give the number of histogram bins here. Default is %(default)s", default=None, type=int)
-    parser.add_argument('-p', '--proportion', required=False, help="Gives the proportion of the phase of interest relative to the full sample volume. Example: Give 0.3 if your phase of interest makes up only 30 percent of your entire sample. Default is %(default)s.", default=1.0, type=float)
+    parser.add_argument('-m', '--ttheta_min', help="If set, minimum 2 theta for calculation of peaks from cif file (degrees). Guessed from GS output file otherwise.", type=float, default=None) # Can be guessed from the grains
+    parser.add_argument('-M', '--ttheta_max', help="If set, maxium 2 theta for calculation of peaks from cif file (degrees). Guessed from GS output file otherwise.", type=float, default=None) # Can be guessed from the grains
+    parser.add_argument('-OV', '--output_vol', required=False, help="If set, saves the relative grain volumes to this file. Default is %(default)s (no filter)", default=None, type=str)
+    parser.add_argument('-OR', '--output_rad', required=False, help="If set, saves the relative grain radii to this file. Default is %(default)s (no filter)", default=None, type=str)
+    parser.add_argument('-HV', '--histogram_vol', required=False, help="If set, plots a histogram of the grain volumes on the screen. Default is %(default)s", default=False, type=bool)
+    parser.add_argument('-HR', '--histogram_rad', required=False, help="If set, plots a histogram of the grain radii on the screen. Default is %(default)s", default=False, type=bool)
+    parser.add_argument('-b', '--histogram_bins', required=False, help="Sets the number of histrogram bins. Only works if histogram is set True. Default is %(default)s", default=60, type=int)
+    parser.add_argument('-r', '--reject', required=False, help="Reject grains with AverageI > reject*MedianI. Default is %(default)s", default=20., type=float)
     
     # Parse arguments
     args = vars(parser.parse_args())
-    grainsizelist = args['grainsizelist']
-    beamsize_H = args['beamsize_H']
-    beamsize_V = args['beamsize_V']
-    rotationrange = args['rotationrange']
-    samplethickness = args['samplethickness']
-    indexquality = args['indexquality']
-    radius = args['radius']
+    ciffile = args['ciffile']
+    ttheta_min = args['ttheta_min']
+    ttheta_max = args['ttheta_max']
+    wavelength = args['wavelength']
+    logfile = args['logfile']
+    fltfile = args['fltfile']
+    output_vol = args['output_vol']
+    output_rad = args['output_rad']
+    histogram_vol = args['histogram_vol']
+    histogram_rad = args['histogram_rad']
     histogram_bins = args['histogram_bins']
-    proportion = args['proportion']
-
-    grainsizes_new, med = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radius=radius, proportion=proportion)
-
-    # Make a histogram
-    if histogram_bins != None:
-        if radius == True: # Note that if radius == True, we are actually talking about volumes!
-            print ("Plotting histogram ...\n")
-            plt.hist(grainsizes_new, bins = histogram_bins)
-            plt.xscale('log')
-            plt.xlabel("Grain volume ($\mu$m^3)")
-            plt.ylabel("Number of grains")
-            plt.title("n = %s" % len(grainsizes_new), fontsize = 20)
-            plt.axvline(med, color='k', linestyle='dashed', linewidth=1)
-            ylim_min, ylim_max = plt.ylim()
-            plt.text(med*1.1, ylim_max*0.9, 'Median: {:.4f} $\mu$m^3'.format(med))
-            plt.show()
-        else:
-            print ("Plotting histogram ...\n")
-            plt.hist(grainsizes_new, bins = histogram_bins)
-            plt.xscale('log')
-            plt.xlabel("Grain radii ($\mu$m)")
-            plt.ylabel("Number of grains")
-            plt.title("n = %s" % len(grainsizes_new), fontsize = 20)
-            plt.axvline(med, color='k', linestyle='dashed', linewidth=1)
-            ylim_min, ylim_max = plt.ylim()
-            plt.text(med*1.1, ylim_max*0.9, 'Median: {:.4f} $\mu$m'.format(med))
-            plt.show()
-            
+    reject = args['reject']
         
+    grainsizes = grainSizeEstimate(logfile, fltfile, ciffile, wavelength, ttheta_min = ttheta_min, ttheta_max = ttheta_max, output_vol=output_vol, output_rad=output_rad, kickoutfactor=reject)
+    
+    # Make a histogram
+    if histogram_vol == True:
+        print ("Plotting histogram ...\n")
+        plt.hist(grainsizes, bins = histogram_bins)
+        plt.xlabel("Grain volumes (relative units)")
+        plt.ylabel("Number of grains")
+        plt.title("n = %s" % len(grainsizes), fontsize = 20)
+        plt.show()
+    if histogram_rad == True:
+        print ("Plotting histogram ...\n")
+        radii = []
+        for item in grainsizes:
+            radius = (3*item/4/numpy.pi)**(1/3)
+            radii.append(radius)
+        plt.hist(radii, bins = histogram_bins)
+        plt.xlabel("Grain radii (relative units)")
+        plt.ylabel("Number of grains")
+        plt.title("n = %s" % len(grainsizes), fontsize = 20)
+        plt.show()
+
+
 # Calling method 1 (used when generating a binary in setup.py)
 def run():
     main(sys.argv[1:])
