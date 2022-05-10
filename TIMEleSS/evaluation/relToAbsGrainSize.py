@@ -57,16 +57,16 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
 	ngrains = 0
 	grainRelVolumes = []
 	for grain in grainsizes:
-		ngrains += 1
-		grain = float(grain)
-		if (radius): # Grain size in file is a radius
-			grainV = 4./3*numpy.pi*grain**(3.) # Turn grain radii into grain volumes
-			grainRelVolumes.append(grainV)
-		else: 
-			grainV = grain
-			grainRelVolumes.append(grainV)
-		total += grainV
-	total = total
+		if not grain.strip().startswith("#"):
+			ngrains += 1
+			grain = float(grain)
+			if (radius): # Grain size in file is a radius
+				grainV = 4./3*numpy.pi*grain**(3.) # Turn grain radii into grain volumes
+				grainRelVolumes.append(grainV)
+			else: 
+				grainV = grain
+				grainRelVolumes.append(grainV)
+			total += grainV
 
 	# Calculate the sample chamber volume. Check the wiki for more info on the formula.
 	totalsamplechambervol = beamsize_V * beamsize_H * samplethickness * numpy.cos(rotationrange*numpy.pi/180/2) + 0.5 * beamsize_V * samplethickness**2 * numpy.tan(rotationrange*numpy.pi/180/2)
@@ -104,11 +104,13 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
 		grainsizes_V.append(grainV)
 	newfile = filename + "_absV.txt"
 	f= open(newfile,"w+")
+	f.write("# Absolute grain volumes (µm^3)")
 	f.write(stringV)
 	f.close()
 	print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
 	newfile = filename + "_absR.txt"
 	f= open(newfile,"w+")
+	f.write("# Absolute grain radii (µm^3)")
 	f.write(stringR)
 	f.close()
 	print ("Saved new list of grain radii (in µm) as %s." % (newfile))
