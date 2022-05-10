@@ -104,13 +104,13 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
 		grainsizes_V.append(grainV)
 	newfile = filename + "_absV.txt"
 	f= open(newfile,"w+")
-	f.write("# Absolute grain volumes (µm^3)")
+	f.write("# Absolute grain volumes (µm^3)\n")
 	f.write(stringV)
 	f.close()
 	print ("\nSaved new list of grain volumes (in µm^3) as %s." % (newfile))
 	newfile = filename + "_absR.txt"
 	f= open(newfile,"w+")
-	f.write("# Absolute grain radii (µm^3)")
+	f.write("# Absolute grain radii (µm)\n")
 	f.write(stringR)
 	f.close()
 	print ("Saved new list of grain radii (in µm) as %s." % (newfile))
