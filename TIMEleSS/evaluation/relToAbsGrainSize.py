@@ -45,7 +45,7 @@ import numpy
 # beamsize_H and beamsize_V:    Horizontal and vertical dimension of the X-ray beam in $\mu$m. Necessary to calculate the illuminated sample volume.
 # rotationrange:                Full rotation range used in the experiment in $\mu$m. Necessary to calculate the illuminated sample volume more accurately.
 # samplethickness:              Thickness of the sample in $\mu$m. Necessary to calculate the illuminated sample volume.
-# indexquality:                 Quality of the previous indexing process in percent. Used to account for the fact that not all grains were found during the indexing.
+# indexquality:                 Quality of the previous indexing process in percent. Used to account for the fact that not all grains were found during the indexing, between 0 and 1.
 # radius:                       Boolean operator that determines if grainsizelist consists of grain volumes or grain radii. True means volumes, False means radii.
 # histogram_bins:               Number of histogram bins you want to use. By default, no histogram is plotted.
 # proportion:                   Defines how much of the sample is your phase of interest. Can be between 0 and 1.
@@ -70,7 +70,7 @@ def absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, sa
 
 	# Calculate the sample chamber volume. Check the wiki for more info on the formula.
 	totalsamplechambervol = beamsize_V * beamsize_H * samplethickness * numpy.cos(rotationrange*numpy.pi/180/2) + 0.5 * beamsize_V * samplethickness**2 * numpy.tan(rotationrange*numpy.pi/180/2)
-	indexedGrainsV = totalsamplechambervol * indexquality / 100. * proportion # Account for the indexing quality and side phases
+	indexedGrainsV = totalsamplechambervol * indexquality * proportion # Account for the indexing quality and side phases
 	print("Read arbitrary grain sizes from %s" % grainsizelist)
 	if (radius):
 		print("I believe I read a list of grain radii")
@@ -159,7 +159,7 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
 	parser.add_argument('-V', '--beamsize_V', required=True, help="Beamsize parallel to rotation axis (micrometer), usually vertical (required)", type=float)
 	parser.add_argument('-r', '--rotationrange', required=True, help="Full rotation range. Example: [-28,+28] rotation = 56 degrees (required)", type=float)
 	parser.add_argument('-t', '--samplethickness', required=True, help="Thickness of your sample (micrometer). If sample has varying thickness, estimate an average. (required)", type=float)
-	parser.add_argument('-i', '--indexquality', required=True, help="Percentage of indexed g-vectors (in percent). Estimate if not determined (required)", type=float)
+	parser.add_argument('-i', '--indexquality', required=True, help="Estimate of indexing performance (1.0 is perfect, 0.3 means 30pc of sample grains have been indexed, required)", type=float)
 	
 	# Optionnal arguments
 	parser.add_argument('-rad', '--radius', required=False, help="Add '-rad' to treat the grainsizelist as list of grain radii. Don´t add this argument to treat the grainsizelist as list of grain volumes. Default is volumes.", default=False, action='store_true')
@@ -177,6 +177,15 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
 	radius = args['radius']
 	histogram_bins = args['histogram_bins']
 	proportion = args['proportion']
+
+	# check that "proportion" and "indexquality" are below 0 and 1
+	if ((indexquality < 0) or (indexquality > 1.0)):
+		print ("\nError: parameter for indexing quality should be between 0 and 1.0 (for 100pc of indexed grains).\nYou provided: %.2f \nOlder version did use percents as input but this was changed for consistency.\n" % indexquality)
+		sys.exit(2)
+	if ((proportion < 0) or (proportion > 1.0)):
+		print ("\nError: parameter for phase proportion should be between 0 and 1.0 (if the phase of interest is the entire sample).\nYou provided: %.2f \nOlder version did use percents as input but this was changed for consistency.\n" % proportion)
+		sys.exit(2)
+		
 
 	grainsizes_R, med = absolute_grainsizes(grainsizelist, beamsize_H, beamsize_V, rotationrange, samplethickness, indexquality, radius=radius, proportion=proportion)
 
