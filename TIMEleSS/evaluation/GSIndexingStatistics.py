@@ -148,7 +148,7 @@ def gs_indexing_statistics(logfile, gve, gsinputfile, wavelength):
 	omega = []
 	keepPeak = [False] * len(allgves)
 	
-	for i in range(1,nphases): # Loop on phase
+	for i in range(0,nphases): # Loop on phase
 		gsinput[i]["dsranges"] = []
 		for tthrange in gsinput[i]["tthranges"]:  # Convert 2theta range to ds range for easier comparison
 			ds0 = 2.*numpy.sin(numpy.radians(tthrange[0]/2.))/(wavelength)
