@@ -63,6 +63,8 @@ class Grain:
 	def getName(self):
 		name = "Grain-%d" % (self.indexInFile)
 		return name
+	def getIndexInFile(self):
+		return self.indexInFile
 	def setNPeaks(self,npeaks):
 		self.NumbPeaks = npeaks
 	def getNPeaks(self):
