@@ -50,7 +50,7 @@ from TIMEleSS.general import cifTools
 
 # Moved histogram out of the function. I do not like to mix calculations and gui in a single function
 
-def grainSizeEstimate(logfile, fltfile, ciffile, wavelength, ttheta_min=None, ttheta_max=None, output_vol=None, output_rad=None, kickoutfactor=20):
+def grainSizeEstimate(logfile, fltfile, ciffile, wavelength, output = None, ttheta_min=None, ttheta_max=None, kickoutfactor=20):
     """
     Determination of grain size statistics based on diffraction intensities
     Diffracting intensities for each peak is normalized by the theoretical intensity (structure factor and Lorentz correction) for that peak
@@ -60,9 +60,9 @@ def grainSizeEstimate(logfile, fltfile, ciffile, wavelength, ttheta_min=None, tt
      - fltfile
      - ciffile
      - wavelength (in angstroms)
+     - output: name of output file, does not save of the file name is not set
      - ttheta_min: min value for 2theta is simulation of peaks from cif, in degrees, guessed from GS output file if set to None)
      - ttheta_max: max value for 2theta is simulation of peaks from cif, in degrees, guessed from GS output file if set to None)
-     - output: name of output file to save results in a file
      - kickoutfactor: remove grains for which the averageI is >= kickoutfactor*medianI
     
     Returns:
@@ -110,11 +110,12 @@ def grainSizeEstimate(logfile, fltfile, ciffile, wavelength, ttheta_min=None, tt
 
     # Preparing a list to store normalized grain sizes    
     grainsizes = []
-    grainID = 0
+    grainID = []
+    eulers = []
     
     # Loop on grains
     for grain in grains:
-        grainID += 1
+        thisID = grain.getIndexInFile()
         peaks = grain.getPeaks()
         grainintensity = [] # A temporary list containing the normalized intensities
         for peak in peaks:
@@ -135,34 +136,28 @@ def grainSizeEstimate(logfile, fltfile, ciffile, wavelength, ttheta_min=None, tt
         average = sum(grainintensity) / len(grainintensity) # av int for each grain
         kickout = kickoutfactor*numpy.median(grainintensity) # kickoutfactor times median of each grain
         if average >= kickout:
-            print ("\nIntensities of grain %s are a bit shakey\n--> Grain %s is removed from the list." % (grainID,grainID))
+            print ("\nIntensities of grain %s are a bit shakey\n--> Grain %s is removed from the list." % (thisID,thisID))
         else:
             grainsizes.append(average) # Collect the averages in a list
+            eulers.append(grain.EulerAnglesFromU())
+            grainID.append(thisID)
+    #print(grainID)
 
+    # Normalize volumes
+    totalvol = sum(grainsizes)
+    for i in range(0,len(grainsizes)):
+        grainsizes[i] = grainsizes[i]/totalvol
+    
     # Print the result to the console or save into a file
-    string_V = ""
-    string_R = ""
-    for item in grainsizes:
-        string_V += str(item) + "\n"
-        radius = (3*item/4/numpy.pi)**(1/3)
-        string_R += str(radius) + "\n"
-    if output_vol is None:
-        print (string_V)
-        print ("Printed relative grain volumes to the command line")
-        # pass
-    else:
-        f= open(output_vol,"w+")
-        f.write(string_V)
+    if (output != None):
+        f= open(output,"w+")
+        f.write("# grainID, phi1, Phi, phi2, relative grain volume, grain radii (arbitrary unit)\n")
+        for i in range(0,len(grainsizes)):
+           radius = (3*grainsizes[i]/4/numpy.pi)**(1/3)
+           f.write("%i %.2f %.2f %.2f %.4e %.4e\n" % (grainID[i], eulers[i][0], eulers[i][1], eulers[i][2], grainsizes[i], radius))
         f.close()
-        print ("Saved list of relative grain volumes in %s" % (output_vol))
-    if output_rad is None:
-        pass
-    else:
-        f= open(output_rad,"w+")
-        f.write(string_R)
-        f.close()
-        print ("Saved list of relative grain radii in %s" % (output_rad))
-    print ("\nDetermined relative grain sizes for %d grains.\n" % len(grainsizes))
+        print ("Saved list of relative grain volumes and radii in %s" % (output))
+    print ("\nDone with determination of relative grain sizes for %d grains.\n" % len(grainsizes))
     return grainsizes
 
 
@@ -202,15 +197,18 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     parser.add_argument('fltfile', help="Path and name for fltfile")
     parser.add_argument('ciffile', help="Path and name for CIF file")
     parser.add_argument('-w', '--wavelength', required=True, help="Wavelength (angstrom, required)", type=float)
+    parser.add_argument('-o', '--output', required=True, help="Name of output file (required)", type=str)
     
     # Optionnal arguments
     parser.add_argument('-m', '--ttheta_min', help="If set, minimum 2 theta for calculation of peaks from cif file (degrees). Guessed from GS output file otherwise.", type=float, default=None) # Can be guessed from the grains
     parser.add_argument('-M', '--ttheta_max', help="If set, maxium 2 theta for calculation of peaks from cif file (degrees). Guessed from GS output file otherwise.", type=float, default=None) # Can be guessed from the grains
-    parser.add_argument('-OV', '--output_vol', required=False, help="If set, saves the relative grain volumes to this file. Default is %(default)s (no filter)", default=None, type=str)
-    parser.add_argument('-OR', '--output_rad', required=False, help="If set, saves the relative grain radii to this file. Default is %(default)s (no filter)", default=None, type=str)
-    parser.add_argument('-HV', '--histogram_vol', required=False, help="If set, plots a histogram of the grain volumes on the screen. Default is %(default)s", default=False, type=bool)
-    parser.add_argument('-HR', '--histogram_rad', required=False, help="If set, plots a histogram of the grain radii on the screen. Default is %(default)s", default=False, type=bool)
-    parser.add_argument('-b', '--histogram_bins', required=False, help="Sets the number of histrogram bins. Only works if histogram is set True. Default is %(default)s", default=60, type=int)
+    # 01/2023: made only one output file with both relative volumes and radii. We were getting confused.
+    # parser.add_argument('-OV', '--output_vol', required=False, help="If set, saves the relative grain volumes to this file. Default is %(default)s (no filter)", default=None, type=str)
+    # parser.add_argument('-OR', '--output_rad', required=False, help="If set, saves the relative grain radii to this file. Default is %(default)s (no filter)", default=None, type=str)
+    # 01/2023: S. Merkel, commented out this section. Not good to mix plain text output and graphical interface
+    # parser.add_argument('-HV', '--histogram_vol', required=False, help="If set, plots a histogram of the grain volumes on the screen. Default is %(default)s", default=False, type=bool)
+    # parser.add_argument('-HR', '--histogram_rad', required=False, help="If set, plots a histogram of the grain radii on the screen. Default is %(default)s", default=False, type=bool)
+    # parser.add_argument('-b', '--histogram_bins', required=False, help="Sets the number of histrogram bins. Only works if histogram is set True. Default is %(default)s", default=60, type=int)
     parser.add_argument('-r', '--reject', required=False, help="Reject grains with AverageI > reject*MedianI. Default is %(default)s", default=20., type=float)
     
     # Parse arguments
@@ -221,34 +219,36 @@ This is part of the TIMEleSS project\nhttp://timeless.texture.rocks
     wavelength = args['wavelength']
     logfile = args['logfile']
     fltfile = args['fltfile']
-    output_vol = args['output_vol']
-    output_rad = args['output_rad']
-    histogram_vol = args['histogram_vol']
-    histogram_rad = args['histogram_rad']
-    histogram_bins = args['histogram_bins']
+    output = args['output']
+    #output_vol = args['output_vol']
+    #output_rad = args['output_rad']
+    #histogram_vol = args['histogram_vol']
+    #histogram_rad = args['histogram_rad']
+    #histogram_bins = args['histogram_bins']
     reject = args['reject']
         
-    grainsizes = grainSizeEstimate(logfile, fltfile, ciffile, wavelength, ttheta_min = ttheta_min, ttheta_max = ttheta_max, output_vol=output_vol, output_rad=output_rad, kickoutfactor=reject)
+    grainsizes = grainSizeEstimate(logfile, fltfile, ciffile, wavelength, ttheta_min = ttheta_min, ttheta_max = ttheta_max, output=output, kickoutfactor=reject)
     
+    # 01/2023: S. Merkel, commented out this section. Not good to mix plain text output and graphical interface
     # Make a histogram
-    if histogram_vol == True:
-        print ("Plotting histogram ...\n")
-        plt.hist(grainsizes, bins = histogram_bins)
-        plt.xlabel("Grain volumes (relative units)")
-        plt.ylabel("Number of grains")
-        plt.title("n = %s" % len(grainsizes), fontsize = 20)
-        plt.show()
-    if histogram_rad == True:
-        print ("Plotting histogram ...\n")
-        radii = []
-        for item in grainsizes:
-            radius = (3*item/4/numpy.pi)**(1/3)
-            radii.append(radius)
-        plt.hist(radii, bins = histogram_bins)
-        plt.xlabel("Grain radii (relative units)")
-        plt.ylabel("Number of grains")
-        plt.title("n = %s" % len(grainsizes), fontsize = 20)
-        plt.show()
+    #if histogram_vol == True:
+        #print ("Plotting histogram ...\n")
+        #plt.hist(grainsizes, bins = histogram_bins)
+        #plt.xlabel("Grain volumes (relative units)")
+        #plt.ylabel("Number of grains")
+        #plt.title("n = %s" % len(grainsizes), fontsize = 20)
+        #plt.show()
+    #if histogram_rad == True:
+        #print ("Plotting histogram ...\n")
+        #radii = []
+        #for item in grainsizes:
+            #radius = (3*item/4/numpy.pi)**(1/3)
+            #radii.append(radius)
+        #plt.hist(radii, bins = histogram_bins)
+        #plt.xlabel("Grain radii (relative units)")
+        #plt.ylabel("Number of grains")
+        #plt.title("n = %s" % len(grainsizes), fontsize = 20)
+        #plt.show()
 
 
 # Calling method 1 (used when generating a binary in setup.py)
