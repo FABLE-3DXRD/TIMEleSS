@@ -75,6 +75,7 @@ setup(
 			'timelessGrainPeaksComparison = TIMEleSS.simulation.grainPeaksComparison:run',
 			'timelessGrainSpotterMerge = TIMEleSS.simulation.grainSpotterMerge:run',
 			'timelessTiff2edf = TIMEleSS.diffraction.tiff2edf:run',
+			'timelessID27_hdf5_To_Edf = TIMEleSS.diffraction.ID27_hdf5_To_Edf:run',
 			'timelessMccd2edf = TIMEleSS.diffraction.mccd2edf:run',
 			'timelessEdf2tiffFileSeries = TIMEleSS.diffraction.edf2tiffFileSeries:run',
 			'timelessEdf2tiff = TIMEleSS.diffraction.edf2tiffSingle:run',
