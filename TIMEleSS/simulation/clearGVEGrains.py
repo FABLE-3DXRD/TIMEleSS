@@ -34,7 +34,7 @@ import os.path
 
 from TIMEleSS.general import multigrainOutputParser
 
-def cropGVE(grainfile, oldgvefile, newgvefile, verbose, skipbogus):
+def cropGVE(grainfile, oldgvefile, newgvefile, verbose, skipbogus,saveIndexedGVEFile):
 
 	grains = multigrainOutputParser.parse_GrainSpotter_log(grainfile,skipbogus)
 	print("Parsed grains from %s" % grainfile)
@@ -43,7 +43,10 @@ def cropGVE(grainfile, oldgvefile, newgvefile, verbose, skipbogus):
 	[peaksgve,idlist,header] = multigrainOutputParser.parseGVE(oldgvefile)
 
 	print("Removing peaks which have been assigned to grains in %s" % grainfile)
-
+	if (saveIndexedGVEFile != None):
+		print ("Indexed GVE's will be saved into %s" % saveIndexedGVEFile)
+	
+	indexedGVE = []
 	for grain in grains:
 		if (verbose):
 			print("Looking at grain %s" % grain.getName())
@@ -63,9 +66,12 @@ def cropGVE(grainfile, oldgvefile, newgvefile, verbose, skipbogus):
 			if (verbose):
 				print("Trying to remove peak %d from the list of g-vectors" % thisid)
 			del idlist[index]
+			indexedGVE.append(peaksgve[index])
 			del peaksgve[index]
 
 	multigrainOutputParser.saveGVE(peaksgve, header, newgvefile)
+	if (saveIndexedGVEFile != None):
+		multigrainOutputParser.saveGVE(indexedGVE, header, saveIndexedGVEFile)
 
 
 #################################################################
@@ -99,6 +105,7 @@ def main(argv):
 	
 	parser.add_argument('-v', '--verbose', required=False, help="Write out more details about what it does. Default is  Default is %(default)s", type=bool, default=False)
 	parser.add_argument('-s', '--skipbogus', required=False, help="Skip bogus grains in GrainSpotter output. Default is  Default is %(default)s", type=bool, default=False)
+	parser.add_argument('-k', '--keepindexed', required=False, help="Save peaks which were actually indexed. Provide file name. Default is %(default)s", default=None)
 
 	args = vars(parser.parse_args())
 
@@ -107,9 +114,10 @@ def main(argv):
 	newGVE = args['newGVE']
 	verbose = args['verbose']
 	skipbogus = args['skipbogus']
+	saveIndexedGVEFile = args['keepindexed']
 
 
-	cropGVE(gsfile, oldGVE, newGVE, verbose, skipbogus)
+	cropGVE(gsfile, oldGVE, newGVE, verbose, skipbogus,saveIndexedGVEFile)
 
 
 # Calling method 1 (used when generating a binary in setup.py)
