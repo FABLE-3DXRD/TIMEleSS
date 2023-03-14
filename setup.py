@@ -94,6 +94,7 @@ setup(
 			'timeless2thetaHistFromGVE = TIMEleSS.evaluation.twoThetaHistFromGVE:run',
 			'timelessGSIndexingStatistics = TIMEleSS.evaluation.GSIndexingStatistics:run',
 			'timelessPeaksFromCIF = TIMEleSS.simulation.printPeaksFromCIF:run',
+			'timelessUpdateGVEFromCIF = TIMEleSS.simulation.updateGVEFromCIF:run',
 			'timelessFixGSOutput = TIMEleSS.evaluation.fixGrainSpotterOutput:run',
 			'timelessTthHistogram2Maud = TIMEleSS.evaluation.tthHistogram2Maud:run',
 			'timelessExtractGrainSizes = TIMEleSS.evaluation.extractGrainSizes:run',
