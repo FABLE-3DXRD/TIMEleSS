@@ -58,6 +58,7 @@ def setGVEPeaksFromCIF(ciffile, gve_file_input, gve_file_output, ttheta_min,  tt
 	"""
 	
 	# Get cell parameters
+	
 	cell_pars = cifTools.unit_cell_from_Cif(ciffile)
 	
 	# Generating list of peaks, with ds, h, k, and l
