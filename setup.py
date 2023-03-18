@@ -40,7 +40,7 @@ pathMySubPackage3 = util.convert_path('TIMEleSS/diffraction')
 pathMySubPackage4 = util.convert_path('TIMEleSS/evaluation')
     
 setup(
-	name='TIMEleSS',
+	name='TIMEleSS-tools',
 	python_requires='>3.0.0',
 	version='1.0.0',
 	description='Multigrain crystallography toolbox from the TIMEleSS project',
