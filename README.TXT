@@ -26,19 +26,33 @@ Descriptions of TIMEleSS-tools: http://multigrain.texture.rocks/doku.php?id=soft
 Installation instructions
 *************************************************************************************
 
-To use the TIMEleSS tools, 
+To use the TIMEleSS tools, you have to possibilities
 
+The easy way, which may not be fully up-to-date:
+pip install TIMEleSS-tools
+
+
+The harder way, with the latest additions
 1- Either log-in as administrator, to install it for everyone, or as a simple user, for a single user installation,
 2- Download and install python, version 3 or later
 3- Add the following general python packages: numpy, scipy, matplotlib, PyQt5, PIL, 
 4- Add fabio, https://github.com/silx-kit/fabio
 5- Add the xfab, ImageD11, polyxsim packages from the FABLE-3DXRD project at https://github.com/FABLE-3DXRD 
-6- Finally, compile and install the timeless tools
+6- Download the TIMEleSS by typing
+	git clone https://github.com/FABLE-3DXRD/TIMEleSS.git
+7- Move into the TIMEleSS folder
+8- Finally, compile and install the timeless tools
 	pip install .
-You may be asked to run python3 instead of python2. In this case, step 6 becomes
+You may be asked to run python3 instead of python2. In this case, step 8 becomes
 	pip3 install .
 
-To update an already installed version of the TIMEleSS tools, you should use
+To update an already installed version of the TIMEleSS tools, you should
+	move into the folder where you downloaded the TIMEleSS tools, and then
+	git pull
+	pip install --upgrade  --no-deps --force-reinstall  .
+If you do not locate the corresponding folder, then
+	git clone https://github.com/FABLE-3DXRD/TIMEleSS.git
+	Move into the TIMEleSS folder
 	pip install --upgrade  --no-deps --force-reinstall  .
 
 After installation, you should find the various TIMEleSS scripts, somewhere in your path. They all start with the word 'timeless'. Type 'timeless' followed by Tab key in a terminal and you will get the list.
@@ -83,4 +97,4 @@ Version number is defined in 2 places
 To upload a new version to pypi
 - increase version number
 - python setup.py sdist
-- twine upload dist/TIMEleSS-X.Y.Z.tar.gz
+- twine upload dist/TIMEleSS-tools-X.Y.Z.tar.gz
