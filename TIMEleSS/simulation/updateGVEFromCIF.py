@@ -57,6 +57,10 @@ def setGVEPeaksFromCIF(ciffile, gve_file_input, gve_file_output, ttheta_min,  tt
 	Created: 13/2023, S. Merkel, Univ. Lille, France
 	"""
 	
+	# Get cell parameters
+	cell_pars = cifTools.unit_cell_from_Cif(ciffile)
+	print(cell_pars)
+	
 	# Generating list of peaks, with ds, h, k, and l
 	hkls = cifTools.peaksFromCIF(ciffile, ttheta_min,  ttheta_max, wavelength, minI, True)
 	peakstring = ""
@@ -76,14 +80,15 @@ def setGVEPeaksFromCIF(ciffile, gve_file_input, gve_file_output, ttheta_min,  tt
 	for line in headers:
 		if (line != ""):
 			if (i == 0):
-				headernew = headers[i] + "\n"
+				line1 = ' '.join([str(n) for n in cell_pars])
+				headernew = line1 + "\n"
 			elif (line[0] == "#"):
 				headernew += headers[i]  + "\n"
 			elif (donewithpeaks == False):
 				headernew += peakstring 
 				donewithpeaks = True
 		i += 1
-	print (headernew)
+	# print (headernew)
 	
 	# Save the new GVE file
 	multigrainOutputParser.saveGVE(peaksgve, headernew, gve_file_output)
