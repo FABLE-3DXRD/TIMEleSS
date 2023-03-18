@@ -79,10 +79,11 @@ def setGVEPeaksFromCIF(ciffile, gve_file_input, gve_file_output, ttheta_min,  tt
 	[peaksgve,idlist,header] = multigrainOutputParser.parseGVE(gve_file_input)
 	
 	# Header should be changed with the new list of peaks
-	# First line should be kept, it is the cell parameters
-	# Lines of comments should be kept
+	# First line are cell parameters
+	# Lines of comments should be kept, except unit cell information which is updated
 	# Lines with ds, h, k, l should be changed
 	i = 0
+
 	donewithpeaks = False
 	headers = header.split('\n')
 	for line in headers:
@@ -91,7 +92,23 @@ def setGVEPeaksFromCIF(ciffile, gve_file_input, gve_file_output, ttheta_min,  tt
 				line1 = ' '.join([str(n) for n in cell_pars])
 				headernew = line1 + "\n"
 			elif (line[0] == "#"):
-				headernew += headers[i]  + "\n"
+				test = line.split()
+				if (test[1] == "cell__a"):
+					headernew += "# cell__a = %f" % cell_pars[0]  + "\n"
+				elif (test[1] == "cell__b"):
+					headernew += "# cell__b = %f" % cell_pars[1]  + "\n"
+				elif (test[1] == "cell__c"):
+					headernew += "# cell__c = %f" % cell_pars[2]  + "\n"
+				elif (test[1] == "cell_alpha"):
+					headernew += "# cell_alpha = %f" % cell_pars[3]  + "\n"
+				elif (test[1] == "cell_beta"):
+					headernew += "# cell_beta = %f" % cell_pars[4]  + "\n"
+				elif (test[1] == "cell_gamma"):
+					headernew += "# cell_gamma = %f" % cell_pars[5]  + "\n"
+				elif (test[1] == "cell_lattice_[P,A,B,C,I,F,R]"):
+					headernew += "# cell_lattice_[P,A,B,C,I,F,R] = %s" % cell_pars[6]  + "\n"
+				else:
+					headernew += headers[i]  + "\n"
 			elif (donewithpeaks == False):
 				headernew += peakstring 
 				donewithpeaks = True
