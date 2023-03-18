@@ -59,11 +59,18 @@ def setGVEPeaksFromCIF(ciffile, gve_file_input, gve_file_output, ttheta_min,  tt
 	
 	# Get cell parameters
 	cell_pars = cifTools.unit_cell_from_Cif(ciffile)
-	print(cell_pars)
 	
 	# Generating list of peaks, with ds, h, k, and l
 	hkls = cifTools.peaksFromCIF(ciffile, ttheta_min,  ttheta_max, wavelength, minI, True)
 	peakstring = ""
+	if (len(hkls) == 0):
+		print("\nERROR!\nNot a single diffraction peaks from this phase between %.2f and %.2f degrees with a wavelength of %.5f" % (ttheta_min, ttheta_max, wavelength) )
+		print("Check your 2theta range and try again!\n")
+		sys.exit(2)
+	else:
+		print("\n%d diffraction peaks between %.2f and %.2f degrees based on %s" % (len(hkls), ttheta_min, ttheta_max, ciffile) )
+		print("Saving new GVE file as %s\n" % gve_file_output)
+		
 	for hkl in hkls:
 		peakstring += "%.6f % d % d % d\n" % (hkl[3], hkl[0], hkl[1], hkl[2])
 	
