@@ -79,3 +79,8 @@ Note to self
 Version number is defined in 2 places
 - in setup.py
 - in __init__.py in the main folder
+
+To upload a new version to pypi
+- increase version number
+- python setup.py sdist
+- twine upload dist/TIMEleSS-X.Y.Z.tar.gz
