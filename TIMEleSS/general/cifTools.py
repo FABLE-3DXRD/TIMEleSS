@@ -69,11 +69,33 @@ def build_B_from_Cif(ciffile):
 	
 	Created: 12/2019, S. Merkel, Univ. Lille, France
 	"""
+	param = {} 
 	param['structure_phase_0'] = ciffile
 	xtal_structure = open_cif(param,0)
 	unit_cell = param['unit_cell_phase_0']
 	B = tools.form_b_mat(unit_cell)
 	return B
+
+
+def unit_cell_from_Cif(ciffile):
+	"""
+	Returns unit cell parameters and lattice centering (one of P,A,B,C,I,F) from a cif file
+	
+	Parameter:
+	- cif file name
+	
+	Returns
+	- Unit cell and lattice centering as a list [a,b,c,alpha,beta,gamma,centering]
+	
+	Created: 03/2023, S. Merkel, Univ. Lille, France
+	"""
+	param = {} 
+	param['structure_phase_0'] = ciffile
+	xtal_structure = open_cif(param,0)
+	unit_cell = param['unit_cell_phase_0']
+	centering = (param['sgname_phase_0']).strip()[0]
+	unit_cell.append(centering)
+	return unit_cell
 
 
 def gen_Miller_ds(param,phasenum):
