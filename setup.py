@@ -42,7 +42,7 @@ pathMySubPackage4 = util.convert_path('TIMEleSS/evaluation')
 setup(
 	name='TIMEleSS',
 	python_requires='>3.0.0',
-	version='0.0.1',
+	version='1.0.0',
 	description='Multigrain crystallography toolbox from the TIMEleSS project',
 	license='GPL', 
 	maintainer='Sebastien Merkel',
