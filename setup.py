@@ -53,20 +53,16 @@ setup(
     'Science project': 'http://timeless.texure.rocks',
 	},
 	
-	install_requires=['xfab','numpy','scipy','fabio','matplotlib','PycifRW'],
+	install_requires=['xfab','numpy','scipy','fabio','matplotlib','PycifRW', 'PyQt5'],
 	
 	package_dir = {
 				'TIMEleSS': 'TIMEleSS',
 				'TIMEleSS.general': pathMySubPackage1,
 				'TIMEleSS.simulation': pathMySubPackage2,
 				'TIMEleSS.diffraction': pathMySubPackage3,
-				'TIMEleSS.evaluation': pathMySubPackage4,
-                'TIMEleSS.data': util.convert_path('TIMEleSS/data')},
+				'TIMEleSS.evaluation': pathMySubPackage4},
 	packages=['TIMEleSS', 'TIMEleSS.general', 'TIMEleSS.simulation', 'TIMEleSS.diffraction', 'TIMEleSS.evaluation'],
 	
-	package_data = {'TIMEleSS': ['TIMEleSS/data/*.*']},
-	include_package_data=True,
-	zip_safe=False, # This is needed so the package is not stuffed into a zip. Data files can not be accessed if so.
 	
 	entry_points = {
 		'console_scripts': [
