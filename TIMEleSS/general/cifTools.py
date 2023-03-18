@@ -164,7 +164,7 @@ def calc_intensity(hkl,struct,wavelength,normI=False):
 		ds = hkl[i][3]
 		theta = numpy.arcsin(ds*wavelength/2.)
 		int[i] = int[i]/numpy.sin(2.*theta)
-	if (normI):
+	if ((normI) and (len(hkl)>0)):
 		maxI = max(int)
 		int = 100.*int/maxI
 	hkl = numpy.concatenate((hkl,int),1)
