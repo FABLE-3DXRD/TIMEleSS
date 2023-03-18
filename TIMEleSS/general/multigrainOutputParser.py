@@ -499,7 +499,7 @@ def parseGVE(fname):
 			idlist.append(thisid)
 			peaks.append(peak)
 	f.close()
-	print ("Parsed list of peaks from gve file %s, found %i peaks" % ( fname, len(peaks)))
+	print ("Parsed list of %i g-vectors from %s" % (len(peaks), fname))
 	return [peaks,idlist,header]
 
 
@@ -535,7 +535,7 @@ def saveGVE(peaks, header, fname):
 	f = open(fname, 'w')
 	f.write(txt)
 	f.close()
-	print ("Saved list of %i peaks into gve file %s" % (len(peaks), fname))
+	print ("Saved list of %i g-vectors into %s" % (len(peaks), fname))
 	return
 
 
