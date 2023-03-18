@@ -72,3 +72,10 @@ Files with a .pyc extension are generated automatically. Same with files in the 
 
 Good luck again!
 
+*************************************************************************************
+Note to self
+*************************************************************************************
+
+Version number is defined in 2 places
+- in setup.py
+- in __init__.py in the main folder
