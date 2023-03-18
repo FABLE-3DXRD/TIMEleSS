@@ -47,6 +47,7 @@ setup(
 	license='GPL', 
 	maintainer='Sebastien Merkel',
 	maintainer_email='sebastien.merkel@univ-lille.fr',
+	url = 'https://github.com/FABLE-3DXRD/TIMEleSS',
 	project_urls={
     'Documentation': 'http://multigrain.texture.rocks/',
     'Source': 'https://github.com/FABLE-3DXRD/TIMEleSS',
