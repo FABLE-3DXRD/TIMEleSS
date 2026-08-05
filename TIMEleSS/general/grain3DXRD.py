@@ -44,9 +44,9 @@ class Grain:
 	Grain in 3-D RDX
 	"""
 	def __init__(self):
-		self.U = scipy.empty([3, 3]) 			# Will hold orientation matrix
-		self.UBi = scipy.empty([3, 3]) 			# Will hold inverse(U)*B  matrix of indexation before adjusting strain
-		self.B = scipy.empty([3, 3]) 		    # Will hold UBi  matrix of indexation before adjusting strain
+		self.U = numpy.empty([3, 3]) 			# Will hold orientation matrix
+		self.UBi = numpy.empty([3, 3]) 			# Will hold inverse(U)*B  matrix of indexation before adjusting strain
+		self.B = numpy.empty([3, 3]) 		    # Will hold UBi  matrix of indexation before adjusting strain
 		self.eulerangles_phi1 = 0				# Euler angle 1 (Bunge convention)
 		self.eulerangles_Phi = 0				# Euler angle 2 (Bunge convention)
 		self.eulerangles_phi2 = 0				# Euler angle 3 (Bunge convention)
