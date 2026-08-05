@@ -32,6 +32,7 @@ Parses various files used in 3D-XRD, dealing with grains
 import sys
 
 # Mathematical stuff (for data array)
+import numpy
 import scipy
 import scipy.linalg
 
@@ -142,7 +143,7 @@ def parse_GrainSpotter_log(logfile,stoponerror=True):
 		grain.setNPeaks(numbpeaks)
 		grain.setFileIndex(int(GrainNum))
 		# Extracting U matrix
-		U = scipy.empty([3,3])
+		U = numpy.empty([3,3])
 		line1 = logcontent[lineindex+3].split()
 		line2 = logcontent[lineindex+4].split()
 		line3 = logcontent[lineindex+5].split()
@@ -151,7 +152,7 @@ def parse_GrainSpotter_log(logfile,stoponerror=True):
 			U[1,i] = float(line2[i])
 			U[2,i] = float(line3[i])
 		# Extracting UBI matrix
-		UBI = scipy.empty([3,3])
+		UBI = numpy.empty([3,3])
 		line1 = logcontent[lineindex+7].split()
 		line2 = logcontent[lineindex+8].split()
 		line3 = logcontent[lineindex+9].split()
@@ -160,8 +161,8 @@ def parse_GrainSpotter_log(logfile,stoponerror=True):
 			UBI[1,i] = float(line2[i])
 			UBI[2,i] = float(line3[i])
 		#print ("UBI = ", UBI)
-		#print ("BI = ", scipy.dot(UBI,U))
-		B =scipy.linalg.inv(scipy.dot(UBI,U))
+		#print ("BI = ", numpy.dot(UBI,U))
+		B =scipy.linalg.inv(numpy.dot(UBI,U))
 		#print ("B = ", B)
 		# Setting information
 		grain.setUBBi(U,B,UBI)
@@ -293,19 +294,19 @@ def parse_gff(gfffile):
 		grain.setFileName(gfffile)
 		grain.setFileIndex(int(j))
 		# Extracting U matrix
-		U = scipy.empty([3,3])
+		U = numpy.empty([3,3])
 		for i in range (0,3):
 			U[0,i] = float(line[10+i])
 			U[1,i] = float(line[13+i])
 			U[2,i] = float(line[16+i])
 		# Extracting UBI matrix
-		UBI = scipy.empty([3,3])
+		UBI = numpy.empty([3,3])
 		for i in range (0,3):
 			UBI[0,i] = float(line[19+i])
 			UBI[1,i] = float(line[22+i])
 			UBI[2,i] = float(line[23+i])
 		# Extracting B
-		B =scipy.linalg.inv( scipy.dot(UBI,U))
+		B =scipy.linalg.inv( numpy.dot(UBI,U))
 		# Setting information
 		grain.setUBBi(U,B,UBI)
 		# extracting the Euler angles phi1 phi phi2
@@ -352,7 +353,7 @@ def parse_ubi(ubifile):
 		grain.setFileName(ubifile)
 		grain.setFileIndex(grainNum)
 		linestart = j*4
-		UBI = scipy.empty([3,3])
+		UBI = numpy.empty([3,3])
 		for k in range(0,3):
 			linecontent = ubicontent[linestart+k].split()
 			UBI[k,0] = float(linecontent[0])
@@ -361,7 +362,7 @@ def parse_ubi(ubifile):
 		# Extracting U from UBi
 		U = ImageD11.indexing.ubitoU(UBI)
 		# Extracting B
-		B =scipy.linalg.inv( scipy.dot(UBI,U))
+		B =scipy.linalg.inv( numpy.dot(UBI,U))
 		# Setting information
 		grain.setUBBi(U,B,UBI)
 		# extracting the Euler angles phi1 phi phi2
